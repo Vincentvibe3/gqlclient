@@ -9,10 +9,20 @@ fun query(
     return query
 }
 
-data class Query(val name:String): QueryElement("query"){
+data class Query(val name:String): QueryElement(name){
+
+    fun type(
+        type:String,
+        init: TypeIntrospection.() -> Unit
+    ): TypeIntrospection {
+        val typeIntrospection = TypeIntrospection(type)
+        components.add(typeIntrospection)
+        typeIntrospection.init()
+        return typeIntrospection
+    }
 
     fun variable(name: String, type: String){
-        variables.add(Pair("$$name", type))
+        components.add(Variable("$$name", type))
     }
 
     fun fragment(
@@ -21,27 +31,13 @@ data class Query(val name:String): QueryElement("query"){
         init: Fragment.() -> Unit
     ): Fragment {
         val fragment = Fragment(name, type, false)
-        fragments.add(fragment)
+        components.add(fragment)
         fragment.init()
         return fragment
     }
 
     override fun toString(): String {
-        var queryString = "$queryElementName $name"
-        val varStrings = variables.joinToString(separator = ",") { "${it.first}:${it.second}" }
-        if (variables.isNotEmpty()){
-            queryString+="($varStrings)"
-        }
-        queryString+="{"
-        queryString+=fields.joinToString(separator=",") {
-            it.toString()
-        }
-        queryString+="}"
-        if (fragments.isNotEmpty()){
-            queryString+=","
-        }
-        queryString+=fragments.joinToString(separator = ",") { it.toString() }
-        return queryString
+        return "query "+super.toString()
     }
 
     override fun hashCode(): Int {

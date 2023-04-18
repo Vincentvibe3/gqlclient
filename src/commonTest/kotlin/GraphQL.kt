@@ -153,4 +153,19 @@ class GraphQL {
         assertEquals(expectedMutation, mutation.toString())
     }
 
+    @Test
+    fun introspection(){
+        val typeExpected = "query {__type(name:\"Droid\"){name,kind}}"
+        val type = query {
+            type("Droid"){
+                field("name")
+                field("kind")
+            }
+        }
+        val typeNameExpected = "query {__typename}"
+        val typename = query {
+
+        }
+        assertEquals(typeExpected, type.toString())
+    }
 }

@@ -1,23 +1,17 @@
 package io.github.vincentvibe3.gqlclient
 
 data class Fragment(
-    private val name:String,
+    val name:String,
     private val type:String,
-    private val inline:Boolean
-): QueryElement("fragment") {
+    val inline:Boolean
+): QueryElement("$name on $type") {
 
     override fun toString(): String {
-        var fragmentString = if(inline){
-            ""
+        return if (inline){
+            super.toString()
         } else {
-            "$queryElementName "
+            "fragment ${super.toString()}"
         }
-        fragmentString = "$fragmentString$name on $type{"
-        fragmentString+=fields.joinToString(separator=",") {
-            it.toString()
-        }
-        fragmentString+="}"
-        return fragmentString
     }
 
 }

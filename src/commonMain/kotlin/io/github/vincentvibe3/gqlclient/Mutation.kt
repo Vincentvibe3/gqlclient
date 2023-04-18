@@ -9,10 +9,10 @@ fun mutation(
     return mutation
 }
 
-data class Mutation(val name: String): QueryElement("mutation"){
+data class Mutation(val name: String): QueryElement(name){
 
     fun variable(name: String, type: String){
-        variables.add(Pair("$$name", type))
+        components.add(Variable("$$name", type))
     }
 
     fun fragment(
@@ -21,26 +21,13 @@ data class Mutation(val name: String): QueryElement("mutation"){
         init: Fragment.() -> Unit
     ): Fragment {
         val fragment = Fragment(name, type, false)
-        fragments.add(fragment)
+        components.add(fragment)
         fragment.init()
         return fragment
     }
 
     override fun toString(): String {
-        var queryString = "$queryElementName $name"
-        val varStrings = variables.joinToString(separator = ",") { "${it.first}:${it.second}" }
-        if (variables.isNotEmpty()){
-            queryString+="($varStrings)"
-        }
-        queryString+="{"
-        queryString+=fields.joinToString(separator=",") {
-            it.toString()
-        }
-        queryString+="}"
-        if (fragments.isNotEmpty()){
-            queryString+=","
-        }
-        queryString+=fragments.joinToString(separator = ",") { it.toString() }
-        return queryString
+        return "mutation "+super.toString()
     }
+
 }

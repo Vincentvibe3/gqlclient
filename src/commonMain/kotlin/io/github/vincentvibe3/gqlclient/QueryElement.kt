@@ -1,10 +1,12 @@
 package io.github.vincentvibe3.gqlclient
 
-sealed class QueryElement(val queryElementName: String) {
+sealed class QueryElement(private val queryElementName: String):QueryComponent {
 
-    protected val fragments = ArrayList<Fragment>()
-    protected val variables = ArrayList<Pair<String, String>>()
-    protected val fields = ArrayList<Field>()
+    protected val components = ArrayList<QueryComponent>()
+
+    fun typename(){
+        components.add(TypenameIntrospection())
+    }
 
     fun field(
         name:String,
@@ -12,7 +14,7 @@ sealed class QueryElement(val queryElementName: String) {
     ): Field {
         val field = Field(name)
         field.init()
-        fields.add(field)
+        components.add(field)
         return field
     }
 
@@ -25,19 +27,39 @@ sealed class QueryElement(val queryElementName: String) {
     }
 
     override fun toString(): String {
-        var queryString = "$queryElementName{"
-        queryString+=fields.joinToString(separator=",") {
-            it.toString()
+        var queryString = queryElementName
+        if (components.isNotEmpty()){
+            val arguments = components.filterIsInstance<Argument>().joinToString(",")
+            if (arguments.isNotBlank()){
+                queryString+="($arguments)"
+            }
+            val variables = components.filterIsInstance<Variable>().joinToString(",")
+            if (variables.isNotBlank()){
+                queryString+="($variables)"
+            }
+            queryString+=components.filterIsInstance<Directive>().joinToString(",")
+
+            val otherComponents = components.filter {
+                it is Field || it is FragmentUse || it is Introspection || (it is Fragment && it.inline)
+            }
+            if (otherComponents.isNotEmpty()){
+                queryString+="{"
+                queryString+=otherComponents.joinToString(",")
+                queryString+="}"
+            }
         }
-        queryString+="}"
+        val fragmentDeclarations = components.filterIsInstance<Fragment>().filter {
+            !it.inline
+        }.joinToString(",")
+        if (fragmentDeclarations.isNotBlank()){
+            queryString+=",$fragmentDeclarations"
+        }
         return queryString
     }
 
     override fun hashCode(): Int {
         var result = queryElementName.hashCode()
-        result = 31 * result + fragments.hashCode()
-        result = 31 * result + variables.hashCode()
-        result = 31 * result + fields.hashCode()
+        result = 31 * result + components.hashCode()
         return result
     }
 

@@ -6,33 +6,33 @@ data class Field(
 ): QueryElement(name){
 
     var alias:String? = null
-    private val usedFragments = ArrayList<String>()
-    private var directives = ""
 
     fun addArg(name:String, type: String){
-        variables.add(Pair(name, type))
+        components.add(Argument(name, type))
     }
+
+
 
     fun fragment(
         type:String,
         init: Fragment.() -> Unit
     ): Fragment {
         val fragment = Fragment("...", type, true)
-        fragments.add(fragment)
+        components.add(fragment)
         fragment.init()
         return fragment
     }
 
     fun include(variable:String){
-        directives+="@include(if:\$$variable)"
+        components.add(Directive(Directive.DirectiveType.INCLUDE, variable))
     }
 
     fun skip(variable: String){
-        directives+="@skip(if:\$$variable)"
+        components.add(Directive(Directive.DirectiveType.SKIP, variable))
     }
 
     fun useFragment(name:String){
-        usedFragments.add(name)
+        components.add(FragmentUse(name))
     }
 
     override fun equals(other: Any?): Boolean {
@@ -44,37 +44,17 @@ data class Field(
     }
 
     override fun toString(): String {
-        var fieldString = ""
-        alias?.let { fieldString+="$it:" }
-        fieldString+=queryElementName
-        if (variables.isNotEmpty()){
-            fieldString+="("+variables.joinToString(separator = ",") { arg -> "${arg.first}:${arg.second}" }+")"
+        return if (alias.isNullOrBlank()){
+            super.toString()
+        } else {
+            "$alias:${super.toString()}"
         }
-        fieldString+=directives
-        if (fields.isNotEmpty()||usedFragments.isNotEmpty()||fragments.isNotEmpty()){
-            val sections = arrayListOf<String>()
-            fieldString+="{"
-            if (fields.isNotEmpty()){
-                sections.add(fields.joinToString(separator=",") { it.toString()},)
-            }
-            if (fragments.isNotEmpty()){
-                sections.add(fragments.joinToString(separator = ",") { it.toString() })
-            }
-            if (usedFragments.isNotEmpty()){
-                sections.add(usedFragments.joinToString(separator = ","){ "...$it" })
-            }
-            fieldString+=sections.joinToString(separator = ",")
-            fieldString+="}"
-        }
-        return fieldString
     }
 
     override fun hashCode(): Int {
         var result = super.hashCode()
         result = 31 * result + name.hashCode()
         result = 31 * result + (alias?.hashCode() ?: 0)
-        result = 31 * result + usedFragments.hashCode()
-        result = 31 * result + directives.hashCode()
         return result
     }
 
