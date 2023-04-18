@@ -9,6 +9,10 @@ data class Field(
     private val usedFragments = ArrayList<String>()
     private var directives = ""
 
+    fun addArg(name:String, type: String){
+        variables.add(Pair(name, type))
+    }
+
     fun fragment(
         type:String,
         init: Fragment.() -> Unit
@@ -43,8 +47,9 @@ data class Field(
         var fieldString = ""
         alias?.let { fieldString+="$it:" }
         fieldString+=queryElementName
-        val frozenArg = variables
-        frozenArg.let { fieldString+="("+it.joinToString(separator = ",") { arg -> "${arg.first}:${arg.second}" }+")"}
+        if (variables.isNotEmpty()){
+            fieldString+="("+variables.joinToString(separator = ",") { arg -> "${arg.first}:${arg.second}" }+")"
+        }
         fieldString+=directives
         if (fields.isNotEmpty()||usedFragments.isNotEmpty()||fragments.isNotEmpty()){
             val sections = arrayListOf<String>()

@@ -43,4 +43,18 @@ data class Query(val name:String): QueryElement("query"){
         queryString+=fragments.joinToString(separator = ",") { it.toString() }
         return queryString
     }
+
+    override fun hashCode(): Int {
+        return super.hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+        if (!super.equals(other)) return false
+
+        other as Query
+
+        return name == other.name
+    }
 }

@@ -34,7 +34,11 @@ sealed class QueryElement(val queryElementName: String) {
     }
 
     override fun hashCode(): Int {
-        return fields.hashCode()
+        var result = queryElementName.hashCode()
+        result = 31 * result + fragments.hashCode()
+        result = 31 * result + variables.hashCode()
+        result = 31 * result + fields.hashCode()
+        return result
     }
 
 }

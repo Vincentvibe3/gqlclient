@@ -19,7 +19,7 @@ class GraphQL {
         val query2Expected = "query {human(id:\"1000\"){name,height}}"
         val query2 = query {
             field("human"){
-                args = listOf(Pair("id", "\"1000\""))
+                addArg("id", "\"1000\"")
                 field("name")
                 field("height")
             }
@@ -28,30 +28,32 @@ class GraphQL {
         val query3Expected = "query {empireHero:hero(episode:EMPIRE){name},jediHero:hero(episode:JEDI){name}}"
         val query3 = query {
             field("hero"){
-                args = listOf(Pair("episode", "EMPIRE"))
+                addArg("episode", "EMPIRE")
                 alias = "empireHero"
                 field("name")
             }
             field("hero"){
-                args = listOf(Pair("episode", "JEDI"))
+                addArg("episode", "JEDI")
                 alias = "jediHero"
                 field("name")
             }
         }
         val query3copy = query {
             field("hero"){
-                args = listOf(Pair("episode", "EMPIRE"))
+                addArg("episode", "EMPIRE")
                 alias = "empireHero"
                 field("name")
             }
             field("hero"){
-                args = listOf(Pair("episode", "JEDI"))
+                addArg("episode", "JEDI")
                 alias = "jediHero"
                 field("name")
             }
         }
         assertEquals(query3Expected, query3.toString())
         assertEquals(query3, query3copy)
+        println(query3.hashCode())
+        println(query2.hashCode())
         assertTrue(query3!=query2)
     }
 
@@ -59,12 +61,12 @@ class GraphQL {
     fun testFragment(){
         val query = query {
             field("hero"){
-                args = listOf(Pair("episode", "EMPIRE"))
+                addArg("episode", "EMPIRE")
                 alias = "leftComparison"
                 useFragment("comparisonFields")
             }
             field("hero"){
-                args = listOf(Pair("episode", "JEDI"))
+                addArg("episode", "JEDI")
                 alias = "rightComparison"
                 useFragment("comparisonFields")
             }
@@ -87,7 +89,7 @@ class GraphQL {
         val expectedQuery = "query {hero(episode:JEDI){name,... on Droid{primaryFunction},... on Human{height}}}"
         val query = query {
             field("hero"){
-                args=listOf(Pair("episode", "JEDI"))
+                addArg("episode", "JEDI")
                 field("name")
                 fragment("Droid"){
                     field("primaryFunction")
@@ -108,7 +110,7 @@ class GraphQL {
             variable("episode", "Episode")
             variable("withFriends", "Boolean!")
             field("hero"){
-                args = listOf(Pair("episode", "\$episode"))
+                addArg("episode", "\$episode")
                 field("name")
                 field("friends"){
                     include("withFriends")
@@ -122,7 +124,7 @@ class GraphQL {
             variable("episode", "Episode")
             variable("withFriends", "Boolean!")
             field("hero"){
-                args = listOf(Pair("episode", "\$episode"))
+                addArg("episode", "\$episode")
                 field("name")
                 field("friends"){
                     skip("withFriends")
@@ -142,7 +144,8 @@ class GraphQL {
             variable("ep", "Episode!")
             variable("review", "ReviewInput!")
             field("createReview"){
-                args= listOf(Pair("episode", "\$ep"),Pair("review", "\$review"))
+                addArg("episode", "\$ep")
+                addArg("review", "\$review")
                 field("stars")
                 field("commentary")
             }
