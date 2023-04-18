@@ -102,9 +102,9 @@ class GraphQL {
 
     @Test
     fun directives(){
-        val expectedQuery = "query Hero(\$episode:Episode,\$withFriends:Boolean!){"+
+        val includeExpectedQuery = "query Hero(\$episode:Episode,\$withFriends:Boolean!){"+
                 "hero(episode:\$episode){name,friends@include(if:\$withFriends){name}}}"
-        val query = query("Hero") {
+        val includeQuery = query("Hero") {
             variable("episode", "Episode")
             variable("withFriends", "Boolean!")
             field("hero"){
@@ -116,7 +116,22 @@ class GraphQL {
                 }
             }
         }
-        assertEquals(expectedQuery, query.toString())
+        val skipExpectedQuery = "query Hero(\$episode:Episode,\$withFriends:Boolean!){"+
+                "hero(episode:\$episode){name,friends@skip(if:\$withFriends){name}}}"
+        val skipQuery = query("Hero") {
+            variable("episode", "Episode")
+            variable("withFriends", "Boolean!")
+            field("hero"){
+                args = listOf(Pair("episode", "\$episode"))
+                field("name")
+                field("friends"){
+                    skip("withFriends")
+                    field("name")
+                }
+            }
+        }
+        assertEquals(skipExpectedQuery, skipQuery.toString())
+        assertEquals(includeExpectedQuery, includeQuery.toString())
     }
 
     @Test

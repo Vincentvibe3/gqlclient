@@ -9,11 +9,7 @@ fun mutation(
     return mutation
 }
 
-class Mutation(val name: String): QueryElement("mutation"){
-
-    private val fragments = ArrayList<Fragment>()
-
-    private val variables = ArrayList<Pair<String, String>>()
+data class Mutation(val name: String): QueryElement("mutation"){
 
     fun variable(name: String, type: String){
         variables.add(Pair("$$name", type))

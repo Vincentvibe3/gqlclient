@@ -9,10 +9,7 @@ fun query(
     return query
 }
 
-class Query(val name:String): QueryElement("query"){
-
-    private val fragments = ArrayList<Fragment>()
-    private val variables = ArrayList<Pair<String, String>>()
+data class Query(val name:String): QueryElement("query"){
 
     fun variable(name: String, type: String){
         variables.add(Pair("$$name", type))

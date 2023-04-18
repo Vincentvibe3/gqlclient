@@ -5,9 +5,7 @@ data class Field(
     val name:String,
 ): QueryElement(name){
 
-    var args:List<Pair<String, String>>?=null
     var alias:String? = null
-    private val fragments = ArrayList<Fragment>()
     private val usedFragments = ArrayList<String>()
     private var directives = ""
 
@@ -45,8 +43,8 @@ data class Field(
         var fieldString = ""
         alias?.let { fieldString+="$it:" }
         fieldString+=queryElementName
-        val frozenArg = args
-        frozenArg?.let { fieldString+="("+it.joinToString(separator = ",") { arg -> "${arg.first}:${arg.second}" }+")"}
+        val frozenArg = variables
+        frozenArg.let { fieldString+="("+it.joinToString(separator = ",") { arg -> "${arg.first}:${arg.second}" }+")"}
         fieldString+=directives
         if (fields.isNotEmpty()||usedFragments.isNotEmpty()||fragments.isNotEmpty()){
             val sections = arrayListOf<String>()
@@ -69,10 +67,9 @@ data class Field(
     override fun hashCode(): Int {
         var result = super.hashCode()
         result = 31 * result + name.hashCode()
-        result = 31 * result + (args?.hashCode() ?: 0)
         result = 31 * result + (alias?.hashCode() ?: 0)
-        result = 31 * result + fragments.hashCode()
         result = 31 * result + usedFragments.hashCode()
+        result = 31 * result + directives.hashCode()
         return result
     }
 

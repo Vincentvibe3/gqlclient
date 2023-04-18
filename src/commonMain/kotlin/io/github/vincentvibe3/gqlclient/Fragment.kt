@@ -1,6 +1,6 @@
 package io.github.vincentvibe3.gqlclient
 
-class Fragment(
+data class Fragment(
     private val name:String,
     private val type:String,
     private val inline:Boolean

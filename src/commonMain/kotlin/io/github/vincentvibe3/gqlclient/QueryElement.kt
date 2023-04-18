@@ -1,7 +1,9 @@
 package io.github.vincentvibe3.gqlclient
 
-open class QueryElement(val queryElementName: String) {
+sealed class QueryElement(val queryElementName: String) {
 
+    protected val fragments = ArrayList<Fragment>()
+    protected val variables = ArrayList<Pair<String, String>>()
     protected val fields = ArrayList<Field>()
 
     fun field(
