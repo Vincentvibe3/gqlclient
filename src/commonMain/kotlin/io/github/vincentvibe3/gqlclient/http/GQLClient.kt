@@ -4,15 +4,15 @@ import io.github.vincentvibe3.gqlclient.dsl.Mutation
 import io.github.vincentvibe3.gqlclient.dsl.Operation
 import io.github.vincentvibe3.gqlclient.dsl.Query
 import io.ktor.client.*
-import io.ktor.client.engine.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
 
-class GQLClient(engine: HttpClientEngine) {
 
-    @PublishedApi internal val httpClient = HttpClient(engine)
+class GQLClient(
+    val httpClient: HttpClient = HttpClient()
+) {
 
     @PublishedApi internal fun buildQuery(operation: Operation, operationName:String, variables:JsonObject?): String {
         val name = operationName.ifBlank {

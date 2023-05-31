@@ -2,6 +2,7 @@ import io.github.vincentvibe3.gqlclient.dsl.Field
 import io.github.vincentvibe3.gqlclient.dsl.mutation
 import io.github.vincentvibe3.gqlclient.dsl.query
 import io.github.vincentvibe3.gqlclient.http.*
+import io.ktor.client.*
 import io.ktor.client.engine.mock.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
@@ -36,7 +37,7 @@ class HttpTests {
                 )
             }
         }
-        val client = GQLClient(mockEngine)
+        val client = GQLClient(HttpClient(mockEngine))
         runBlocking {
             val response = client.sendQuery<JsonObject, DefaultGQLError>("",query)
             assertEquals(expectedResponse, response.data.toString())
@@ -75,7 +76,7 @@ class HttpTests {
                 status = HttpStatusCode.BadRequest
             )
         }
-        val client = GQLClient(mockEngine)
+        val client = GQLClient(HttpClient(mockEngine))
         val variables = buildJsonObject {
             put("episode", "JEDI")
         }
@@ -115,7 +116,7 @@ class HttpTests {
                 status = HttpStatusCode.BadRequest
             )
         }
-        val client = GQLClient(mockEngine)
+        val client = GQLClient(HttpClient(mockEngine))
         val variables = buildJsonObject {
             put("episode", "JEDI")
         }
@@ -142,7 +143,7 @@ class HttpTests {
                 status = HttpStatusCode.OK
             )
         }
-        val client = GQLClient(mockEngine)
+        val client = GQLClient(HttpClient(mockEngine))
         runBlocking {
             val response = client.sendQuery<JsonObject, CustomGQLError>("", query {  })
             response.errors?.let { assertEquals(expectedError, it.first()) }
@@ -165,7 +166,7 @@ class HttpTests {
                 status = HttpStatusCode.BadRequest
             )
         }
-        val client = GQLClient(mockEngine)
+        val client = GQLClient(HttpClient(mockEngine))
         runBlocking {
             val response = client.sendMutation<JsonObject, CustomGQLError>("", mutation {  }, headers = listOf(
                 HttpHeader("X-Test-Header", "Test")
