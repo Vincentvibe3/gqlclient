@@ -1,3 +1,0 @@
-package io.github.vincentvibe3.gqlclient
-
-interface Introspection:QueryComponent

@@ -1,4 +1,4 @@
-package io.github.vincentvibe3.gqlclient
+package io.github.vincentvibe3.gqlclient.dsl
 
 fun mutation(
     name: String="",
@@ -15,14 +15,15 @@ data class Mutation(val name: String): QueryElement(name){
         components.add(Variable("$$name", type))
     }
 
+    @Suppress("unused")
+
     fun fragment(
         name:String,
         type:String,
         init: Fragment.() -> Unit
     ): Fragment {
-        val fragment = Fragment(name, type, false)
+        val fragment = io.github.vincentvibe3.gqlclient.dsl.fragment(name, type, init)
         components.add(fragment)
-        fragment.init()
         return fragment
     }
 

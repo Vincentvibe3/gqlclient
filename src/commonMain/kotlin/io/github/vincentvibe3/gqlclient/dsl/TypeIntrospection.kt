@@ -1,6 +1,6 @@
-package io.github.vincentvibe3.gqlclient
+package io.github.vincentvibe3.gqlclient.dsl
 
-data class TypeIntrospection(val type:String):QueryElement("__type"),Introspection {
+data class TypeIntrospection(val type:String): QueryElement("__type"), Introspection {
 
     init {
         components.add(Argument("name", "\"$type\""))

@@ -1,4 +1,4 @@
-package io.github.vincentvibe3.gqlclient
+package io.github.vincentvibe3.gqlclient.dsl
 
 fun query(
     name: String="",
@@ -30,10 +30,22 @@ data class Query(val name:String): QueryElement(name){
         type:String,
         init: Fragment.() -> Unit
     ): Fragment {
-        val fragment = Fragment(name, type, false)
+        val fragment = io.github.vincentvibe3.gqlclient.dsl.fragment(name, type, init)
         components.add(fragment)
-        fragment.init()
         return fragment
+    }
+
+    fun schema(
+        init: SchemaIntrospection.() -> Unit = {}
+    ): SchemaIntrospection {
+        val schema = SchemaIntrospection()
+        schema.init()
+        components.add(schema)
+        return schema
+    }
+
+    fun registerFragment(fragment:Fragment){
+        components.add(fragment)
     }
 
     override fun toString(): String {

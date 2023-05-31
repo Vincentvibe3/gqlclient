@@ -1,9 +1,9 @@
-package io.github.vincentvibe3.gqlclient
+package io.github.vincentvibe3.gqlclient.dsl
 
 data class Variable(
     private val name:String,
     private val type:String
-):QueryComponent{
+): QueryComponent {
     override fun toString(): String {
         return "$name:$type"
     }

@@ -1,9 +1,9 @@
-package io.github.vincentvibe3.gqlclient
+package io.github.vincentvibe3.gqlclient.dsl
 
 data class Directive(
-    private val type:DirectiveType,
+    private val type: DirectiveType,
     private val condition:String
-):QueryComponent {
+): QueryComponent {
 
     enum class DirectiveType{
         INCLUDE, SKIP

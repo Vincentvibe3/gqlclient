@@ -1,9 +1,9 @@
-package io.github.vincentvibe3.gqlclient
+package io.github.vincentvibe3.gqlclient.dsl
 
 data class Argument(
     val name:String,
     val types:List<String>
-):QueryComponent{
+): QueryComponent {
     constructor(name: String, type:String) : this(name, listOf(type))
     override fun toString(): String {
         return if (types.size==1){

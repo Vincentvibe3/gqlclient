@@ -1,10 +1,12 @@
-import io.github.vincentvibe3.gqlclient.mutation
-import io.github.vincentvibe3.gqlclient.query
+import io.github.vincentvibe3.gqlclient.dsl.Field
+import io.github.vincentvibe3.gqlclient.dsl.fragment
+import io.github.vincentvibe3.gqlclient.dsl.mutation
+import io.github.vincentvibe3.gqlclient.dsl.query
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class GraphQL {
+class DSLTests {
 
     @Test
     fun testField(){
@@ -19,7 +21,7 @@ class GraphQL {
         val query2Expected = "query {human(id:\"1000\"){name,height}}"
         val query2 = query {
             field("human"){
-                addArg("id", "\"1000\"")
+                addArg("id", 1000, Field.ArgumentType.STRING_LITERAL)
                 field("name")
                 field("height")
             }
@@ -28,54 +30,81 @@ class GraphQL {
         val query3Expected = "query {empireHero:hero(episode:EMPIRE){name},jediHero:hero(episode:JEDI){name}}"
         val query3 = query {
             field("hero"){
-                addArg("episode", "EMPIRE")
+                addArg("episode", "EMPIRE", Field.ArgumentType.TYPE)
                 alias = "empireHero"
                 field("name")
             }
             field("hero"){
-                addArg("episode", "JEDI")
+                addArg("episode", "JEDI", Field.ArgumentType.TYPE)
                 alias = "jediHero"
                 field("name")
             }
         }
         val query3copy = query {
             field("hero"){
-                addArg("episode", "EMPIRE")
+                addArg("episode", "EMPIRE", Field.ArgumentType.TYPE)
                 alias = "empireHero"
                 field("name")
             }
             field("hero"){
-                addArg("episode", "JEDI")
+                addArg("episode", "JEDI", Field.ArgumentType.TYPE)
                 alias = "jediHero"
                 field("name")
             }
         }
         assertEquals(query3Expected, query3.toString())
         assertEquals(query3, query3copy)
-        println(query3.hashCode())
-        println(query2.hashCode())
         assertTrue(query3!=query2)
     }
 
     @Test
     fun testFragment(){
         val query = query {
-            field("hero"){
-                addArg("episode", "EMPIRE")
-                alias = "leftComparison"
-                useFragment("comparisonFields")
-            }
-            field("hero"){
-                addArg("episode", "JEDI")
-                alias = "rightComparison"
-                useFragment("comparisonFields")
-            }
-            fragment("comparisonFields", "Character") {
+            val fragment = fragment("comparisonFields", "Character") {
                 field("name")
                 field("appearsIn")
                 field("friends"){
                     field("name")
                 }
+            }
+            field("hero"){
+                addArg("episode", "EMPIRE", Field.ArgumentType.TYPE)
+                alias = "leftComparison"
+                useFragment(fragment)
+            }
+            field("hero"){
+                addArg("episode", "JEDI", Field.ArgumentType.TYPE)
+                alias = "rightComparison"
+                useFragment(fragment)
+            }
+        }
+        val expectedQuery = "query {leftComparison:hero(episode:EMPIRE){...comparisonFields},"+
+                "rightComparison:hero(episode:JEDI){...comparisonFields}},"+
+                "fragment comparisonFields on Character{name,appearsIn,friends{name}}"
+        assertEquals(expectedQuery, query.toString())
+    }
+
+
+    @Test
+    fun testExternalFragment(){
+        val fragment = fragment("comparisonFields", "Character") {
+            field("name")
+            field("appearsIn")
+            field("friends"){
+                field("name")
+            }
+        }
+        val query = query {
+            registerFragment(fragment)
+            field("hero"){
+                addArg("episode", "EMPIRE", Field.ArgumentType.TYPE)
+                alias = "leftComparison"
+                useFragment(fragment)
+            }
+            field("hero"){
+                addArg("episode", "JEDI", Field.ArgumentType.TYPE)
+                alias = "rightComparison"
+                useFragment(fragment)
             }
         }
         val expectedQuery = "query {leftComparison:hero(episode:EMPIRE){...comparisonFields},"+
@@ -89,7 +118,7 @@ class GraphQL {
         val expectedQuery = "query {hero(episode:JEDI){name,... on Droid{primaryFunction},... on Human{height}}}"
         val query = query {
             field("hero"){
-                addArg("episode", "JEDI")
+                addArg("episode", "JEDI", Field.ArgumentType.TYPE)
                 field("name")
                 fragment("Droid"){
                     field("primaryFunction")
@@ -110,7 +139,7 @@ class GraphQL {
             variable("episode", "Episode")
             variable("withFriends", "Boolean!")
             field("hero"){
-                addArg("episode", "\$episode")
+                addArg("episode", "episode", Field.ArgumentType.VARIABLE)
                 field("name")
                 field("friends"){
                     include("withFriends")
@@ -124,7 +153,7 @@ class GraphQL {
             variable("episode", "Episode")
             variable("withFriends", "Boolean!")
             field("hero"){
-                addArg("episode", "\$episode")
+                addArg("episode", "episode", Field.ArgumentType.VARIABLE)
                 field("name")
                 field("friends"){
                     skip("withFriends")
@@ -144,8 +173,8 @@ class GraphQL {
             variable("ep", "Episode!")
             variable("review", "ReviewInput!")
             field("createReview"){
-                addArg("episode", "\$ep")
-                addArg("review", "\$review")
+                addArg("episode", "ep", Field.ArgumentType.VARIABLE)
+                addArg("review", "review", Field.ArgumentType.VARIABLE)
                 field("stars")
                 field("commentary")
             }
@@ -162,10 +191,36 @@ class GraphQL {
                 field("kind")
             }
         }
-        val typeNameExpected = "query {__typename}"
+        val typeNameExpected = "query {search(text:\"an\"){__typename,... on Human{name},... on Droid{name},... on Starship{name}}}"
         val typename = query {
-
+            field("search"){
+                addArg("text","an", Field.ArgumentType.STRING_LITERAL)
+                typename()
+                fragment("Human"){
+                    field("name")
+                }
+                fragment("Droid"){
+                    field("name")
+                }
+                fragment("Starship"){
+                    field("name")
+                }
+            }
         }
+        assertEquals(typeNameExpected, typename.toString())
         assertEquals(typeExpected, type.toString())
+    }
+
+    @Test
+    fun schemaIntrospection(){
+        val expectedQuery = "query {__schema{types{name}}}"
+        val query = query {
+            schema {
+                field("types"){
+                    field("name")
+                }
+            }
+        }
+        assertEquals(expectedQuery, query.toString())
     }
 }

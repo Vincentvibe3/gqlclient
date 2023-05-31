@@ -1,6 +1,6 @@
-package io.github.vincentvibe3.gqlclient
+package io.github.vincentvibe3.gqlclient.dsl
 
-sealed class QueryElement(private val queryElementName: String):QueryComponent {
+sealed class QueryElement(private val queryElementName: String): QueryComponent {
 
     protected val components = ArrayList<QueryComponent>()
 

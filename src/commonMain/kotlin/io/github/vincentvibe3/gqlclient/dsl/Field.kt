@@ -1,4 +1,4 @@
-package io.github.vincentvibe3.gqlclient
+package io.github.vincentvibe3.gqlclient.dsl
 
 
 data class Field(
@@ -7,11 +7,39 @@ data class Field(
 
     var alias:String? = null
 
-    fun addArg(name:String, type: String){
-        components.add(Argument(name, type))
+    enum class ArgumentType{
+        STRING_LITERAL, TYPE, NUMBER, VARIABLE
     }
 
+    @Suppress("unused")
+    fun addArg(name:String, typeName: String){
+        components.add(Argument(name, typeName))
+    }
 
+    fun addArg(name:String, typeName: String, type:ArgumentType){
+        val formattedTypeName = when(type){
+            ArgumentType.NUMBER -> typeName
+            ArgumentType.STRING_LITERAL -> "\"$typeName\""
+            ArgumentType.TYPE -> typeName
+            ArgumentType.VARIABLE -> "$$typeName"
+        }
+        components.add(Argument(name, formattedTypeName))
+    }
+
+    fun addArg(name:String, typeName: Long, type:ArgumentType){
+        val formattedTypeName = when(type){
+            ArgumentType.NUMBER -> "$typeName"
+            ArgumentType.STRING_LITERAL -> "\"$typeName\""
+            ArgumentType.TYPE -> "$typeName"
+            ArgumentType.VARIABLE -> "$$typeName"
+        }
+        components.add(Argument(name, formattedTypeName))
+    }
+
+    @Suppress("unused")
+    fun addArg(name:String, type: Long){
+        components.add(Argument(name, "$type"))
+    }
 
     fun fragment(
         type:String,
@@ -31,7 +59,7 @@ data class Field(
         components.add(Directive(Directive.DirectiveType.SKIP, variable))
     }
 
-    fun useFragment(name:String){
+    fun useFragment(name:Fragment){
         components.add(FragmentUse(name))
     }
 

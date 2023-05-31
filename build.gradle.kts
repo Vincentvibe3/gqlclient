@@ -1,5 +1,6 @@
 plugins {
-    kotlin("multiplatform") version "1.8.0"
+    kotlin("multiplatform") version "1.8.21"
+    kotlin("plugin.serialization") version "1.8.21"
 }
 
 group = "io.github.vincentvibe3"
@@ -40,15 +41,18 @@ kotlin {
     }
     sourceSets {
         val ktorVersion = "2.2.4"
+        val serializationVersion = "1.5.1"
         val commonMain by getting {
             dependencies {
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
             }
         }
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
+                implementation("io.ktor:ktor-client-mock:$ktorVersion")
             }
         }
         val jvmMain by getting {

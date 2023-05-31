@@ -1,0 +1,153 @@
+import io.github.vincentvibe3.gqlclient.dsl.Field
+import io.github.vincentvibe3.gqlclient.dsl.query
+import io.github.vincentvibe3.gqlclient.http.GQLClient
+import io.github.vincentvibe3.gqlclient.http.DefaultGQLError
+import io.github.vincentvibe3.gqlclient.http.GQLError
+import io.github.vincentvibe3.gqlclient.http.QueryRequest
+import io.ktor.client.engine.mock.*
+import io.ktor.http.*
+import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
+
+class HttpTests {
+
+    @Test
+    fun queryRequest(){
+        val payload = "{\"data\":{\"hero\":{\"name\":\"R2-D2\",\"appearsIn\":[\"NEWHOPE\",\"EMPIRE\",\"JEDI\"]}}}"
+        val expectedResponse = "{\"hero\":{\"name\":\"R2-D2\",\"appearsIn\":[\"NEWHOPE\",\"EMPIRE\",\"JEDI\"]}}"
+        val query = query {
+            field("hero"){
+                field("name")
+                field("appearsIn")
+            }
+        }
+        val mockEngine = MockEngine{request ->
+            val serializedData = Json.decodeFromString<QueryRequest>(request.body.toByteArray().decodeToString())
+            if (serializedData.query==query.toString()){
+                respond(
+                    content = payload,
+                    status=HttpStatusCode.OK,
+                    headers= headersOf(HttpHeaders.ContentType, "application/json")
+                )
+            } else{
+                respond(
+                    content="failed",
+                    status = HttpStatusCode.BadRequest
+                )
+            }
+        }
+        val client = GQLClient(mockEngine)
+        runBlocking {
+            val response = client.send<JsonObject, DefaultGQLError>("",query)
+            assertEquals(expectedResponse, response.data.toString())
+        }
+
+    }
+
+    @Test
+    fun queryRequestWithVariables(){
+        val payload = "{\"data\":{\"hero\":{\"name\":\"R2-D2\",\"friends\":[{\"name\":\"LukeSkywalker\"},{\"name\":\"HanSolo\"},{\"name\":\"LeiaOrgana\"}]}}}"
+        val expectedResponse = "{\"hero\":{\"name\":\"R2-D2\",\"friends\":[{\"name\":\"LukeSkywalker\"},{\"name\":\"HanSolo\"},{\"name\":\"LeiaOrgana\"}]}}"
+        val query = query("HeroNameAndFriends") {
+            variable("varName", "varType")
+            field("hero"){
+                addArg("episode", "episode", Field.ArgumentType.VARIABLE)
+                field("name")
+                field("friends"){
+                    field("name")
+                }
+            }
+        }
+        val mockEngine = MockEngine{request ->
+            val serializedData = Json.decodeFromString<QueryRequest>(request.body.toByteArray().decodeToString())
+            val receivedVariables = serializedData.variables?.let { Json.decodeFromString<JsonObject>(it) }
+            if (receivedVariables!=null) {
+                if (receivedVariables.getValue("episode").jsonPrimitive.content == "JEDI") {
+                    return@MockEngine respond(
+                        content = payload,
+                        status = HttpStatusCode.OK,
+                        headers = headersOf(HttpHeaders.ContentType, "application/json")
+                    )
+                }
+            }
+            respond(
+                content="failed",
+                status = HttpStatusCode.BadRequest
+            )
+        }
+        val client = GQLClient(mockEngine)
+        val variables = buildJsonObject {
+            put("episode", "JEDI")
+        }
+        runBlocking {
+            val response = client.send<JsonObject, DefaultGQLError>("",query,variables)
+            assertEquals(expectedResponse, response.data.toString())
+        }
+    }
+
+    @Test
+    fun queryRequestWithOperationName(){
+        val payload = "{\"data\":{\"hero\":{\"name\":\"R2-D2\",\"friends\":[{\"name\":\"LukeSkywalker\"},{\"name\":\"HanSolo\"},{\"name\":\"LeiaOrgana\"}]}}}"
+        val expectedResponse = "{\"hero\":{\"name\":\"R2-D2\",\"friends\":[{\"name\":\"LukeSkywalker\"},{\"name\":\"HanSolo\"},{\"name\":\"LeiaOrgana\"}]}}"
+        val query = query("HeroNameAndFriends") {
+            variable("varName", "varType")
+            field("hero"){
+                addArg("episode", "episode",Field.ArgumentType.VARIABLE)
+                field("name")
+                field("friends"){
+                    field("name")
+                }
+            }
+        }
+        val mockEngine = MockEngine{request ->
+            val serializedData = Json.decodeFromString<QueryRequest>(request.body.toByteArray().decodeToString())
+            if (serializedData.operationName!=null) {
+                if (serializedData.operationName == "queryHeroes") {
+                    return@MockEngine respond(
+                        content = payload,
+                        status = HttpStatusCode.OK,
+                        headers = headersOf(HttpHeaders.ContentType, "application/json")
+                    )
+                }
+            }
+            respond(
+                content="failed",
+                status = HttpStatusCode.BadRequest
+            )
+        }
+        val client = GQLClient(mockEngine)
+        val variables = buildJsonObject {
+            put("episode", "JEDI")
+        }
+        runBlocking {
+            val response = client.send<JsonObject, DefaultGQLError>("",query,variables, "queryHeroes")
+            assertEquals(expectedResponse, response.data.toString())
+        }
+    }
+
+    @Test
+    fun testErrors(){
+        val payload = "{\"errors\":[{\"message\":\"Cannot query field \\\"field\\\" on type \\\"Query\\\".\",\"status\":400,\"locations\":[{\"line\":16,\"column\":7}]}],\"data\":null}"
+        val expectedError=CustomGQLError(
+            "Cannot query field \"field\" on type \"Query\".",
+            status = 400,
+            listOf(
+                GQLError.ErrorLocations(
+                16,7
+            )),
+        )
+        val mockEngine = MockEngine{request ->
+            respond(
+                content=payload,
+                status = HttpStatusCode.OK
+            )
+        }
+        val client = GQLClient(mockEngine)
+        runBlocking {
+            val response = client.send<JsonObject, CustomGQLError>("", query {  })
+            response.errors?.let { assertEquals(expectedError, it.first()) }
+        }
+    }
+}
