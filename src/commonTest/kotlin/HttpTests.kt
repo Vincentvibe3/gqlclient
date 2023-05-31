@@ -61,7 +61,7 @@ class HttpTests {
         }
         val mockEngine = MockEngine{request ->
             val serializedData = Json.decodeFromString<QueryRequest>(request.body.toByteArray().decodeToString())
-            val receivedVariables = serializedData.variables?.let { Json.decodeFromString<JsonObject>(it) }
+            val receivedVariables = serializedData.variables
             if (receivedVariables!=null) {
                 if (receivedVariables.getValue("episode").jsonPrimitive.content == "JEDI") {
                     return@MockEngine respond(
@@ -132,7 +132,7 @@ class HttpTests {
         val expectedError=CustomGQLError(
             "Cannot query field \"field\" on type \"Query\".",
             status = 400,
-            listOf(
+            locations = listOf(
                 GQLError.ErrorLocations(
                 16,7
             )),

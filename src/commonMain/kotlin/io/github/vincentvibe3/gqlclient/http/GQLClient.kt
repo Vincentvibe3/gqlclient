@@ -9,65 +9,105 @@ import io.ktor.client.statement.*
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
 
-
+/**
+ *
+ * Client used to send HTTP POST requests to an api
+ *
+ * @param httpClient The [HttpClient]
+ * used to send requests. Uses an automatically configured [HttpClient] by default.
+ *
+ * @see HttpClient
+ */
 class GQLClient(
     val httpClient: HttpClient = HttpClient()
 ) {
 
+    /**
+     * Serializes data into a json payload for HTTP POST
+     *
+     * @see QueryRequest
+     */
     @PublishedApi internal fun buildQuery(operation: Operation, operationName:String, variables:JsonObject?): String {
         val name = operationName.ifBlank {
             null
         }
-        val variablesString = if (variables.isNullOrEmpty()){
-            null
-        } else {
-            variables.toString()
-        }
-        return Json.encodeToString(QueryRequest(operation.toString(),name,variablesString))
+        return Json.encodeToString(QueryRequest(operation.toString(),name,variables))
     }
 
-   suspend inline fun <reified T, reified K:GQLError> send(
+    /**
+     * Sends an operation by HTTP POST
+     *
+     * @see sendMutation
+     * @see sendQuery
+     */
+    @PublishedApi internal suspend inline fun <reified T, reified E:GQLError> send(
        url:String,
        operation:Operation,
        variables: JsonObject?,
        operationName: String,
        headers:List<HttpHeader>
-   ): Response<T, K> {
-        val response = httpClient.post{
-            url {
-                host = url
-            }
+   ): Response<T, E> {
+        val response = httpClient.post(url){
             headers {
                 headers.forEach {
-                    append(it.key, it.value)
+                    append(it.name, it.value)
                 }
+                append("Content-Type", "application/json")
             }
             setBody(buildQuery(operation, operationName, variables))
         }
         val body = response.bodyAsText()
-        val responseData = Json.decodeFromString<InternalResponse<K>>(body)
+        val responseData = Json.decodeFromString<InternalResponse<E>>(body)
         val data = responseData.data?.let { Json.decodeFromJsonElement<T>(it) }
         return Response(data, responseData.errors, response)
     }
 
-    suspend inline fun <reified T, reified K:GQLError> sendQuery(
+    /**
+     * Sends a query to a specified HTTP endpoint as a POST request.
+     *
+     * @return Returns a [Response] serialized from the json received.
+     *
+     * @param T Type to serialize the data into.
+     * @param E Type to serialize any errors into.
+     * @param url URL to send the request to.
+     * @param query Query to send.
+     * @param variables Values of variables used in query to send (Optional).
+     * @param operationName Name of the operation performed (Optional).
+     * @param headers Headers to send along with the HTTP request as a list of [HttpHeader].
+     *
+     */
+    suspend inline fun <reified T, reified E:GQLError> sendQuery(
         url:String,
         query:Query,
         variables: JsonObject? = null,
         operationName: String = "",
         headers:List<HttpHeader> = listOf()
-    ): Response<T, K>{
-        return send<T, K>(url, query, variables, operationName, headers)
+    ): Response<T, E>{
+        return send<T, E>(url, query, variables, operationName, headers)
     }
 
-    suspend inline fun <reified T, reified K:GQLError> sendMutation(
+    /**
+     * Sends a mutation to a specified HTTP endpoint as a POST request.
+     *
+     * @return Returns a [Response] serialized from the json received.
+     *
+     * @param T Type to serialize the data into.
+     * @param E Type to serialize any errors into.
+     * @param url URL to send the request to.
+     * @param mutation Mutation to send.
+     * @param variables Values of variables used in query to send (Optional).
+     * @param operationName Name of the operation performed (Optional).
+     * @param headers Headers to send along with the HTTP request as a list of [HttpHeader].
+     *
+     */
+    suspend inline fun <reified T, reified E:GQLError> sendMutation(
         url:String,
         mutation:Mutation,
         variables: JsonObject? = null,
         operationName: String = "",
         headers:List<HttpHeader> = listOf()
-    ): Response<T, K>{
-        return send<T, K>(url, mutation, variables, operationName, headers)
+    ): Response<T, E>{
+        return send<T, E>(url, mutation, variables, operationName, headers)
     }
 
 }
