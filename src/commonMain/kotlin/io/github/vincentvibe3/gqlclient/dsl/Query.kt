@@ -9,7 +9,7 @@ fun query(
     return query
 }
 
-data class Query(val name:String): QueryElement(name){
+data class Query(val name:String): QueryElement(name), Operation{
 
     fun type(
         type:String,

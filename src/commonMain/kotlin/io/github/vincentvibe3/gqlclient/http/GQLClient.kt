@@ -1,5 +1,7 @@
 package io.github.vincentvibe3.gqlclient.http
 
+import io.github.vincentvibe3.gqlclient.dsl.Mutation
+import io.github.vincentvibe3.gqlclient.dsl.Operation
 import io.github.vincentvibe3.gqlclient.dsl.Query
 import io.ktor.client.*
 import io.ktor.client.engine.*
@@ -12,7 +14,7 @@ class GQLClient(engine: HttpClientEngine) {
 
     @PublishedApi internal val httpClient = HttpClient(engine)
 
-    @PublishedApi internal fun buildQuery(query: Query, operationName:String, variables:JsonObject?): String {
+    @PublishedApi internal fun buildQuery(operation: Operation, operationName:String, variables:JsonObject?): String {
         val name = operationName.ifBlank {
             null
         }
@@ -21,20 +23,51 @@ class GQLClient(engine: HttpClientEngine) {
         } else {
             variables.toString()
         }
-        return Json.encodeToString(QueryRequest(query.toString(),name,variablesString))
+        return Json.encodeToString(QueryRequest(operation.toString(),name,variablesString))
     }
 
-   suspend inline fun <reified T, reified K:GQLError> send(url:String, query:Query, variables: JsonObject?=null, operationName: String=""): Response<T, K> {
+   suspend inline fun <reified T, reified K:GQLError> send(
+       url:String,
+       operation:Operation,
+       variables: JsonObject?,
+       operationName: String,
+       headers:List<HttpHeader>
+   ): Response<T, K> {
         val response = httpClient.post{
             url {
                 host = url
             }
-            setBody(buildQuery(query, operationName, variables))
+            headers {
+                headers.forEach {
+                    append(it.key, it.value)
+                }
+            }
+            setBody(buildQuery(operation, operationName, variables))
         }
         val body = response.bodyAsText()
         val responseData = Json.decodeFromString<InternalResponse<K>>(body)
         val data = responseData.data?.let { Json.decodeFromJsonElement<T>(it) }
         return Response(data, responseData.errors, response)
+    }
+
+    suspend inline fun <reified T, reified K:GQLError> sendQuery(
+        url:String,
+        query:Query,
+        variables: JsonObject? = null,
+        operationName: String = "",
+        headers:List<HttpHeader> = listOf()
+    ): Response<T, K>{
+        return send<T, K>(url, query, variables, operationName, headers)
+    }
+
+    suspend inline fun <reified T, reified K:GQLError> sendMutation(
+        url:String,
+        mutation:Mutation,
+        variables: JsonObject? = null,
+        operationName: String = "",
+        headers:List<HttpHeader> = listOf()
+    ): Response<T, K>{
+        return send<T, K>(url, mutation, variables, operationName, headers)
     }
 
 }

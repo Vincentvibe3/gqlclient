@@ -9,7 +9,7 @@ fun mutation(
     return mutation
 }
 
-data class Mutation(val name: String): QueryElement(name){
+data class Mutation(val name: String): QueryElement(name), Operation{
 
     fun variable(name: String, type: String){
         components.add(Variable("$$name", type))

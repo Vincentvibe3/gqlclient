@@ -1,9 +1,7 @@
 import io.github.vincentvibe3.gqlclient.dsl.Field
+import io.github.vincentvibe3.gqlclient.dsl.mutation
 import io.github.vincentvibe3.gqlclient.dsl.query
-import io.github.vincentvibe3.gqlclient.http.GQLClient
-import io.github.vincentvibe3.gqlclient.http.DefaultGQLError
-import io.github.vincentvibe3.gqlclient.http.GQLError
-import io.github.vincentvibe3.gqlclient.http.QueryRequest
+import io.github.vincentvibe3.gqlclient.http.*
 import io.ktor.client.engine.mock.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
@@ -40,7 +38,7 @@ class HttpTests {
         }
         val client = GQLClient(mockEngine)
         runBlocking {
-            val response = client.send<JsonObject, DefaultGQLError>("",query)
+            val response = client.sendQuery<JsonObject, DefaultGQLError>("",query)
             assertEquals(expectedResponse, response.data.toString())
         }
 
@@ -82,7 +80,7 @@ class HttpTests {
             put("episode", "JEDI")
         }
         runBlocking {
-            val response = client.send<JsonObject, DefaultGQLError>("",query,variables)
+            val response = client.sendQuery<JsonObject, DefaultGQLError>("",query,variables)
             assertEquals(expectedResponse, response.data.toString())
         }
     }
@@ -122,7 +120,7 @@ class HttpTests {
             put("episode", "JEDI")
         }
         runBlocking {
-            val response = client.send<JsonObject, DefaultGQLError>("",query,variables, "queryHeroes")
+            val response = client.sendQuery<JsonObject, DefaultGQLError>("",query,variables, "queryHeroes")
             assertEquals(expectedResponse, response.data.toString())
         }
     }
@@ -146,8 +144,33 @@ class HttpTests {
         }
         val client = GQLClient(mockEngine)
         runBlocking {
-            val response = client.send<JsonObject, CustomGQLError>("", query {  })
+            val response = client.sendQuery<JsonObject, CustomGQLError>("", query {  })
             response.errors?.let { assertEquals(expectedError, it.first()) }
+        }
+    }
+
+    @Test
+    fun testHeaders(){
+        val mockEngine = MockEngine{request ->
+            if (request.headers.contains("X-Test-Header")){
+                if (request.headers["X-Test-Header"] =="Test"){
+                    return@MockEngine respond(
+                        content="{\"data\":{\"status\":\"OK\"}}",
+                        status=HttpStatusCode.OK
+                    )
+                }
+            }
+            respond(
+                content="failed",
+                status = HttpStatusCode.BadRequest
+            )
+        }
+        val client = GQLClient(mockEngine)
+        runBlocking {
+            val response = client.sendMutation<JsonObject, CustomGQLError>("", mutation {  }, headers = listOf(
+                HttpHeader("X-Test-Header", "Test")
+            ))
+            response.data?.get("status")?.jsonPrimitive?.let { assertEquals(it.content, "OK") }
         }
     }
 }
