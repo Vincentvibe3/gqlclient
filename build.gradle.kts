@@ -2,46 +2,17 @@ plugins {
     kotlin("multiplatform") version "1.8.21"
     kotlin("plugin.serialization") version "1.8.21"
     id("org.jetbrains.dokka") version "1.8.10"
-    `maven-publish`
+    `publication-plugin`
 }
 val artifactStr = "gqlclient"
 val groupStr = "io.github.vincentvibe3"
-val versionStr = "1.0"
+val versionStr = "1.0.0"
 
 group = groupStr
 version = versionStr
 
-
 repositories {
     mavenCentral()
-}
-
-tasks.register<Jar>("dokkaHtmlJar") {
-    dependsOn(tasks.dokkaHtml)
-    from(tasks.dokkaHtml.flatMap { it.outputDirectory })
-    archiveClassifier.set("html-docs")
-}
-
-tasks.register<Jar>("dokkaJavadocJar") {
-    dependsOn(tasks.dokkaJavadoc)
-    from(tasks.dokkaJavadoc.flatMap { it.outputDirectory })
-    archiveClassifier.set("javadoc")
-}
-
-publishing {
-    publications {
-        create<MavenPublication>("maven"){
-            groupId = groupStr
-            artifactId = artifactStr
-            version = versionStr
-
-            from(components["kotlin"])
-
-            pom {
-
-            }
-        }
-    }
 }
 
 kotlin {
