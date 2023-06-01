@@ -2,7 +2,7 @@
 
 A simple GraphQL client for Kotlin Multiplatform
 
-gql uses a DSL to form GraphQL queries and sends them using HTTP POST requests.
+gqlclient uses a DSL to form GraphQL queries and sends them using HTTP POST requests.
 
 ## Getting Started
 
