@@ -2,14 +2,11 @@ plugins {
     kotlin("multiplatform") version "1.8.21"
     kotlin("plugin.serialization") version "1.8.21"
     id("org.jetbrains.dokka") version "1.8.10"
-    `publication-plugin`
+    id("publication-plugin")
 }
-val artifactStr = "gqlclient"
-val groupStr = "io.github.vincentvibe3"
-val versionStr = "1.0.0"
 
-group = groupStr
-version = versionStr
+group = "io.github.vincentvibe3"
+version = "1.0.1"
 
 repositories {
     mavenCentral()
@@ -23,6 +20,15 @@ kotlin {
             useJUnitPlatform()
         }
     }
+    val hostOs = System.getProperty("os.name")
+    val isMingwX64 = hostOs.startsWith("Windows")
+    val nativeTarget = when {
+        hostOs == "Mac OS X" -> macosX64("native")
+        hostOs == "Linux" -> linuxX64("native")
+        isMingwX64 -> mingwX64("native")
+        else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
+    }
+
     iosSimulatorArm64{
         binaries {
             framework {
@@ -52,24 +58,55 @@ kotlin {
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
-
             }
         }
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
                 implementation("io.ktor:ktor-client-mock:$ktorVersion")
-                implementation("io.ktor:ktor-client-cio:$ktorVersion")
+            }
+        }
+        val nativeTest by getting {
+            dependencies{
+                when {
+                    hostOs == "Mac OS X" -> {
+                        implementation("io.ktor:ktor-client-darwin:$ktorVersion")
+                    }
+                    hostOs == "Linux" -> {
+                        implementation("io.ktor:ktor-client-curl:$ktorVersion")
+                    }
+                    isMingwX64 -> {
+                        implementation("io.ktor:ktor-client-winhttp:$ktorVersion")
+                    }
+                    else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
+                }
+
             }
         }
         val jvmMain by getting
-        val jvmTest by getting
+        val jvmTest by getting {
+            dependencies {
+                implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
+            }
+        }
         val iosArm64Main by getting
-        val iosArm64Test by getting
+        val iosArm64Test by getting {
+            dependencies{
+                implementation("io.ktor:ktor-client-darwin:$ktorVersion")
+            }
+        }
         val iosX64Main by getting
-        val iosX64Test by getting
+        val iosX64Test by getting {
+            dependencies{
+                implementation("io.ktor:ktor-client-darwin:$ktorVersion")
+            }
+        }
         val iosSimulatorArm64Main by getting
-        val iosSimulatorArm64Test by getting
+        val iosSimulatorArm64Test by getting {
+            dependencies{
+                implementation("io.ktor:ktor-client-darwin:$ktorVersion")
+            }
+        }
         val iosMain by creating {
             dependsOn(commonMain)
             iosX64Main.dependsOn(this)

@@ -137,7 +137,7 @@ class HttpTests {
                 16,7
             )),
         )
-        val mockEngine = MockEngine{request ->
+        val mockEngine = MockEngine{ _ ->
             respond(
                 content=payload,
                 status = HttpStatusCode.OK

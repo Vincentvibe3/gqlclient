@@ -7,7 +7,7 @@ plugins {
 
 ext["signing.keyId"] = null
 ext["signing.password"] = null
-ext["signing.secretKeyRingFile"] = null
+ext["signing.key"] = null
 ext["ossrhUsername"] = null
 ext["ossrhPassword"] = null
 
@@ -23,17 +23,16 @@ if (secretPropsFile.exists()) {
 } else {
     ext["signing.keyId"] = System.getenv("SIGNING_KEY_ID")
     ext["signing.password"] = System.getenv("SIGNING_PASSWORD")
-//    ext["signing.secretKeyRingFile"] = System.getenv("SIGNING_SECRET_KEY_RING_FILE")
     ext["signing.key"] = System.getenv("SIGNING_SECRET_KEY")
     ext["ossrhUsername"] = System.getenv("OSSRH_USERNAME")
     ext["ossrhPassword"] = System.getenv("OSSRH_PASSWORD")
 }
 
-val javadocJar by tasks.registering(Jar::class) {
-    archiveClassifier.set("javadoc")
-    dependsOn("dokkaHtml")
-    from(buildDir.resolve("dokka/html"))
-}
+//val javadocJar by tasks.registering(Jar::class) {
+////    dependsOn("dokkaHtml")
+//    archiveClassifier.set("javadoc")
+////    from(buildDir.resolve("dokka/html"))
+//}
 
 fun getExtraString(name: String) = ext[name]?.toString()
 
@@ -53,7 +52,14 @@ publishing {
     // Configure all publications
     publications.withType<MavenPublication> {
         // Stub javadoc.jar artifact
-        artifact(javadocJar.get())
+        val javadocJar = tasks.register("${this.name}JavadocJar", Jar::class) {
+            dependsOn("dokkaHtml")
+            archiveClassifier.set("javadoc")
+            from(buildDir.resolve("dokka/html"))
+            // Each archive name should be distinct. Mirror the format for the sources Jar tasks.
+            archiveBaseName.set("${archiveBaseName.get()}-${this.name}")
+        }
+        artifact(javadocJar)
 
         // Provide artifacts information requited by Maven Central
         pom {
@@ -79,6 +85,7 @@ publishing {
             }
         }
     }
+
 }
 
 // Signing artifacts. Signing.* extra properties values will be used
