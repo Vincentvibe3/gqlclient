@@ -28,6 +28,6 @@ suspend fun main(){
     val client = GQLClient()
     runBlocking {
         val response = client.sendMutation<JsonObject, DefaultGQLError>("127.0.0.1", mutation, variables)
-        println(response.toString())
+        println(response.data.toString())
     }
 }

@@ -13,6 +13,6 @@ suspend fun main(){
     val client = GQLClient()
     runBlocking {
         val response = client.sendQuery<JsonObject, DefaultGQLError>("127.0.0.1",query)
-        println(response.toString())
+        println(response.data.toString())
     }
 }
