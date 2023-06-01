@@ -3,6 +3,7 @@ plugins {
     kotlin("plugin.serialization") version "1.8.21"
     id("org.jetbrains.dokka") version "1.8.10"
     id("publication-plugin")
+    `maven-publish`
 }
 
 group = "io.github.vincentvibe3"
@@ -12,7 +13,26 @@ repositories {
     mavenCentral()
 }
 
+val isCI: Boolean = System.getenv("CI").toBoolean()
+
 kotlin {
+    val publicationsFromMainHost =
+        listOf(jvm()).map { it.name } + "kotlinMultiplatform"
+    publishing{
+        publications{
+            if (isCI){
+                matching {
+                    it.name in publicationsFromMainHost
+                }.all{
+                    val targetPublication = this@all
+                    tasks.withType<AbstractPublishToMaven>()
+                        .matching { it.publication == targetPublication }
+                        .configureEach { onlyIf { System.getProperty("os.name") == "Linux" } }
+                }
+            }
+        }
+    }
+
     jvm {
         jvmToolchain(11)
         withJava()
@@ -90,28 +110,25 @@ kotlin {
             }
         }
         val iosArm64Main by getting
-        val iosArm64Test by getting {
-            dependencies{
-                implementation("io.ktor:ktor-client-darwin:$ktorVersion")
-            }
-        }
+        val iosArm64Test by getting
         val iosX64Main by getting
-        val iosX64Test by getting {
-            dependencies{
-                implementation("io.ktor:ktor-client-darwin:$ktorVersion")
-            }
-        }
+        val iosX64Test by getting
         val iosSimulatorArm64Main by getting
-        val iosSimulatorArm64Test by getting {
-            dependencies{
-                implementation("io.ktor:ktor-client-darwin:$ktorVersion")
-            }
-        }
+        val iosSimulatorArm64Test by getting
         val iosMain by creating {
             dependsOn(commonMain)
             iosX64Main.dependsOn(this)
             iosArm64Main.dependsOn(this)
             iosSimulatorArm64Main.dependsOn(this)
+        }
+        val iosTest by creating {
+            dependsOn(commonMain)
+            iosX64Test.dependsOn(this)
+            iosArm64Test.dependsOn(this)
+            iosSimulatorArm64Test.dependsOn(this)
+            dependencies{
+                implementation("io.ktor:ktor-client-darwin:$ktorVersion")
+            }
         }
     }
 }

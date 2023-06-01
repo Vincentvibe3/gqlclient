@@ -28,11 +28,6 @@ if (secretPropsFile.exists()) {
     ext["ossrhPassword"] = System.getenv("OSSRH_PASSWORD")
 }
 
-//val javadocJar by tasks.registering(Jar::class) {
-////    dependsOn("dokkaHtml")
-//    archiveClassifier.set("javadoc")
-////    from(buildDir.resolve("dokka/html"))
-//}
 
 fun getExtraString(name: String) = ext[name]?.toString()
 
