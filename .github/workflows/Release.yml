@@ -1,8 +1,9 @@
 name: Release
 
 on:
-  release:
-    types: [created]
+  push:
+    tags:
+      - "v*.*.*"
     
 permissions:
       contents: read
@@ -25,7 +26,14 @@ jobs:
         server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
         settings-path: ${{ github.workspace }} # location for the settings.xml file
 
+    - name: Set env
+      run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
     - name: Build with Gradle
       uses: gradle/gradle-build-action@v2
       with:
         arguments: publishAllPublicationsToSonatypeRepository --max-workers 1
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      with:
+        body: '##Gradle \n```implementation("io.github.vincentvibe3:gqlclient:${{ env.RELEASE_VERSION }}")```'
