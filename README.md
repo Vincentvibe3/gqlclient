@@ -14,7 +14,7 @@ To add an engine see https://ktor.io/docs/http-client-engines.html
 
 ```kotlin
 dependencies {
-    implementation("<TODO coordinates>")
+    implementation("io.github.vincentvibe3:gqlclient:<version here>")
 }
 ```
 
