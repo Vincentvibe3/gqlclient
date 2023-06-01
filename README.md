@@ -1,6 +1,8 @@
 # gqlclient
 
-![https://img.shields.io/maven-central/v/io.github.vincentvibe3/gqlclient](https://img.shields.io/maven-central/v/io.github.vincentvibe3/gqlclient)
+![https://img.shields.io/maven-central/v/io.github.vincentvibe3/gqlclient](https://img.shields.io/maven-central/v/io.github.vincentvibe3/gqlclient?color=orange)
+[![Build](https://github.com/Vincentvibe3/gqlclient/actions/workflows/Build.yml/badge.svg)](https://github.com/Vincentvibe3/gqlclient/actions/workflows/Build.yml)
+[![Release](https://github.com/Vincentvibe3/gqlclient/actions/workflows/Release.yml/badge.svg)](https://github.com/Vincentvibe3/gqlclient/actions/workflows/Release.yml)
 
 A simple GraphQL client for Kotlin Multiplatform
 
