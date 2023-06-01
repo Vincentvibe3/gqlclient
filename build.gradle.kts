@@ -73,7 +73,7 @@ kotlin {
                         implementation("io.ktor:ktor-client-darwin:$ktorVersion")
                     }
                     hostOs == "Linux" -> {
-                        implementation("io.ktor:ktor-client-curl:$ktorVersion")
+                        implementation("io.ktor:ktor-client-cio:$ktorVersion")
                     }
                     isMingwX64 -> {
                         implementation("io.ktor:ktor-client-winhttp:$ktorVersion")
