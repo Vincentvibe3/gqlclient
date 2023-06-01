@@ -50,7 +50,7 @@ jobs:
     - name: Release
       uses: softprops/action-gh-release@v1
       with:
-        body: '##Gradle \n```implementation("io.github.vincentvibe3:gqlclient:${{ env.RELEASE_VERSION }}")```'
+        body: '## Gradle \n```kotlin\nimplementation("io.github.vincentvibe3:gqlclient:${{ env.RELEASE_VERSION }}")\n```'
         
     - name: Status webhook  
       uses: sarisia/actions-status-discord@v1
