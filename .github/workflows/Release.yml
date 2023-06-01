@@ -23,7 +23,7 @@ jobs:
          staging_profile_id: ${{ secrets.OSSRH_PROFILE_ID }}
          base_url: https://s01.oss.sonatype.org/service/local/
          
-  publish:
+  build-publish:
     needs: create-staging-repository
     strategy:
       matrix:
@@ -57,17 +57,35 @@ jobs:
       with:
         arguments: publishAllPublicationsToSonatypeRepository --max-workers 1
         
-  release:
-    needs: publish
-    runs-on: ubuntu-latest
-    steps:
-    
+  drop-or-release:
+   needs: [create-staging-repository, build-publish]
+   runs-on: ubuntu-latest
+   if: ${{ always() && needs.create_staging_repository.result == 'success' }}
+   steps:
     - uses: actions/checkout@v3
+    - name: Discard
+      if: ${{ needs.build-upload.result != 'success' }}
+      uses: nexus-actions/drop-nexus-staging-repo@v1
+      with:
+       username: ${{ secrets.OSSRH_USERNAME }}
+       password: ${{ secrets.OSSRH_PASSWORD }}
+       staging_repository_id: ${{ needs.create_staging_repository.outputs.repository_id }}
+       base_url: https://s01.oss.sonatype.org/service/local/
+         
+    - name: Release
+      if: ${{ needs.build-upload.result == 'success' }}
+      uses: nexus-actions/release-nexus-staging-repo@v1
+      with:
+         username: ${{ secrets.SONATYPE_USERNAME }}
+         password: ${{ secrets.SONATYPE_PASSWORD }}
+         staging_repository_id: ${{ needs.create_staging_repository.outputs.repository_id }}
+         base_url: https://s01.oss.sonatype.org/service/local/
     
     - name: Set env
       run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
     
     - name: Release
+      if: ${{ needs.build-upload.result == 'success' }}
       uses: softprops/action-gh-release@v1
       with:
         body: | 
