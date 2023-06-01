@@ -10,6 +10,7 @@ ext["signing.password"] = null
 ext["signing.key"] = null
 ext["ossrhUsername"] = null
 ext["ossrhPassword"] = null
+ext["stagingRepoId"] = null
 
 val secretPropsFile = project.rootProject.file("local.properties")
 if (secretPropsFile.exists()) {
@@ -26,17 +27,24 @@ if (secretPropsFile.exists()) {
     ext["signing.key"] = System.getenv("SIGNING_SECRET_KEY")
     ext["ossrhUsername"] = System.getenv("OSSRH_USERNAME")
     ext["ossrhPassword"] = System.getenv("OSSRH_PASSWORD")
+    ext["stagingRepoId"] = System.getenv("STAGING_REPO_ID")
 }
 
 
 fun getExtraString(name: String) = ext[name]?.toString()
+
 
 publishing {
     // Configure maven central repository
     repositories {
         maven {
             name = "sonatype"
-            setUrl("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+            val repoId = getExtraString("stagingRepoId")
+            if (repoId==null){
+                setUrl("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+            } else {
+                setUrl("https://s01.oss.sonatype.org/service/local/staging/deployByRepositoryId/$repoId")
+            }
             credentials {
                 username = getExtraString("ossrhUsername")
                 password = getExtraString("ossrhPassword")
