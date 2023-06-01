@@ -40,14 +40,6 @@ kotlin {
             useJUnitPlatform()
         }
     }
-    val hostOs = System.getProperty("os.name")
-    val isMingwX64 = hostOs.startsWith("Windows")
-    val nativeTarget = when {
-        hostOs == "Mac OS X" -> macosX64("native")
-        hostOs == "Linux" -> linuxX64("native")
-        isMingwX64 -> mingwX64("native")
-        else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
-    }
 
     iosSimulatorArm64{
         binaries {
@@ -70,6 +62,25 @@ kotlin {
             }
         }
     }
+    val hostOs = System.getProperty("os.name")
+    val isMingwX64 = hostOs.startsWith("Windows")
+    when {
+        hostOs == "Mac OS X" -> {
+            macosX64()
+            macosArm64()
+        }
+
+        hostOs == "Linux" -> {
+            linuxArm64()
+            linuxX64()
+        }
+
+        isMingwX64 -> {
+            mingwX64()
+        }
+        else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
+    }
+
     sourceSets {
         val ktorVersion = "2.2.4"
         val serializationVersion = "1.5.1"
@@ -86,23 +97,45 @@ kotlin {
                 implementation("io.ktor:ktor-client-mock:$ktorVersion")
             }
         }
-        val nativeTest by getting {
-            dependencies{
-                when {
-                    hostOs == "Mac OS X" -> {
+
+        when {
+            hostOs == "Mac OS X" -> {
+                val macosX64Test by getting {
+                    dependencies{
                         implementation("io.ktor:ktor-client-darwin:$ktorVersion")
                     }
-                    hostOs == "Linux" -> {
+                }
+                val macosArm64Text by getting {
+                    dependencies{
+                        implementation("io.ktor:ktor-client-darwin:$ktorVersion")
+                    }
+                }
+            }
+
+            hostOs == "Linux" -> {
+                val linuxArm64Test by getting {
+                    dependencies{
                         implementation("io.ktor:ktor-client-cio:$ktorVersion")
                     }
-                    isMingwX64 -> {
+                }
+                val linuxX64Test by getting {
+                    dependencies{
+                        implementation("io.ktor:ktor-client-cio:$ktorVersion")
+                    }
+                }
+            }
+
+            isMingwX64 -> {
+                val mingwX64Test by getting {
+                    dependencies{
                         implementation("io.ktor:ktor-client-winhttp:$ktorVersion")
                     }
-                    else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
                 }
 
             }
+            else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
         }
+
         val jvmMain by getting
         val jvmTest by getting {
             dependencies {
@@ -131,4 +164,18 @@ kotlin {
             }
         }
     }
+
+//    val nativeTarget = when {
+//        hostOs == "Mac OS X" -> {
+//            macosX64("macosX64")
+//            macosArm64("macosArm64")
+//        }
+//        hostOs == "Linux" -> {
+//            linuxX64("linuxX64")
+//            linuxArm64("linuxArm64")
+//        }
+//        isMingwX64 -> mingwX64("mingwX64")
+//        else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
+//    }
+
 }
