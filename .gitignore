@@ -25,3 +25,6 @@ hs_err_pid*
 # Build directory
 build/
 .gradle/
+
+#Secrets
+local.properties
