@@ -37,7 +37,7 @@ jobs:
     - name: Upload jar as artifact
       uses: actions/upload-artifact@v3
       with:
-        name: jar
+        name:  "${{ matrix.os }}"
         path: ./build/libs/
       
     - name: Status webhook  
