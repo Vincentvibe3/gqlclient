@@ -1,5 +1,7 @@
 # gqlclient
 
+![https://img.shields.io/maven-central/v/io.github.vincentvibe3/gqlclient](https://img.shields.io/maven-central/v/io.github.vincentvibe3/gqlclient)
+
 A simple GraphQL client for Kotlin Multiplatform
 
 gqlclient uses a DSL to form GraphQL queries and sends them using HTTP POST requests.
