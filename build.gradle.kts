@@ -71,7 +71,6 @@ kotlin {
         }
 
         hostOs == "Linux" -> {
-            linuxArm64()
             linuxX64()
         }
 
@@ -113,11 +112,6 @@ kotlin {
             }
 
             hostOs == "Linux" -> {
-                val linuxArm64Test by getting {
-                    dependencies{
-                        implementation("io.ktor:ktor-client-cio:$ktorVersion")
-                    }
-                }
                 val linuxX64Test by getting {
                     dependencies{
                         implementation("io.ktor:ktor-client-cio:$ktorVersion")
