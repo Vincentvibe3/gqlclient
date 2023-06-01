@@ -104,7 +104,7 @@ kotlin {
                         implementation("io.ktor:ktor-client-darwin:$ktorVersion")
                     }
                 }
-                val macosArm64Text by getting {
+                val macosArm64Test by getting {
                     dependencies{
                         implementation("io.ktor:ktor-client-darwin:$ktorVersion")
                     }
