@@ -76,8 +76,8 @@ jobs:
       if: ${{ needs.build-upload.result == 'success' }}
       uses: nexus-actions/release-nexus-staging-repo@v1
       with:
-         username: ${{ secrets.SONATYPE_USERNAME }}
-         password: ${{ secrets.SONATYPE_PASSWORD }}
+         username: ${{ secrets.OSSRH_USERNAME }}
+         password: ${{ secrets.OSSRH_PASSWORD }}
          staging_repository_id: ${{ needs.create_staging_repository.outputs.repository_id }}
          base_url: https://s01.oss.sonatype.org/service/local/
     
