@@ -23,6 +23,7 @@ fun fragment(
 
 /**
  * Represents a fragment
+ *
  * Create fragments using [fragment], [Field.fragment] or [Query.fragment]
  *
  * @property name Name of the fragment

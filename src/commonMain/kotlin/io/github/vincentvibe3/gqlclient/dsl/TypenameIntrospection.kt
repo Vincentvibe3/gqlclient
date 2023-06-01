@@ -1,7 +1,7 @@
 package io.github.vincentvibe3.gqlclient.dsl
 
 /**
- * Represents a __typename from the GraphQL introspection API
+ * Represents a `__typename` from the GraphQL introspection API
  *
  * @see QueryElement.typename
  */

@@ -1,7 +1,7 @@
 package io.github.vincentvibe3.gqlclient.dsl
 
 /**
- * Represents a __type from the GraphQL introspection API.
+ * Represents a `__type` from the GraphQL introspection API.
  *
  * @property type The type to get information on.
  *
