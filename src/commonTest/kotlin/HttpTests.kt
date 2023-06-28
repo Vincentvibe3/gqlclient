@@ -1,4 +1,3 @@
-import io.github.vincentvibe3.gqlclient.dsl.Field
 import io.github.vincentvibe3.gqlclient.dsl.Variable
 import io.github.vincentvibe3.gqlclient.dsl.mutation
 import io.github.vincentvibe3.gqlclient.dsl.query

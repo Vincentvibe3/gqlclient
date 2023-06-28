@@ -40,7 +40,7 @@ data class Field(
      * @param name Name of the Argument
      * @param typeName Name of the type used by the argument.
      * @param type [ArgumentType] to determine formatting to be put on the `typeName`.
-     * [ArgumentType.VARIABLE] becomes `$value`. [ArgumentType.STRING_LITERAL] becomes `"value"`.
+     * [ArgumentType.STRING_LITERAL] becomes `"value"`.
      * [ArgumentType.NUMBER] and [ArgumentType.TYPE] are passed as is
      *
      * @see Argument
@@ -95,7 +95,7 @@ data class Field(
      * @param name Name of the Argument
      * @param typeName Name of the type used by the argument.
      * @param type [ArgumentType] to determine formatting to be put on the `typeName`.
-     * [ArgumentType.VARIABLE] becomes `$value`. [ArgumentType.STRING_LITERAL] becomes `"value"`.
+     * [ArgumentType.STRING_LITERAL] becomes `"value"`.
      * [ArgumentType.NUMBER] and [ArgumentType.TYPE] are passed as is
      *
      * @see Argument
@@ -146,7 +146,7 @@ data class Field(
     /**
      * Adds an `include` directive to the field
      *
-     * @param variable The variable used as a condition
+     * @param bool Boolean controlling the directive
      *
      * @see Directive
      */
@@ -162,7 +162,7 @@ data class Field(
     /**
      * Adds an `skip` directive to the field
      *
-     * @param variable The variable used as a condition
+     * @param bool Boolean controlling the directive
      *
      * @see Directive
      */
