@@ -5,8 +5,6 @@ import io.ktor.client.statement.*
 /**
  * Wraps the response and error received from a query or mutation as a string.
  *
- * @param T The type to deserialize data into.
- * @param E The type to deserialize errors.
  * @property data The returned data if available. `null` if no data was received.
  * @property errors The returned errors if available. `null` if no data was received.
  * @property httpResponse The [HttpResponse] as returned by ktor.

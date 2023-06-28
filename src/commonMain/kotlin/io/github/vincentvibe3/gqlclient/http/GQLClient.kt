@@ -128,6 +128,7 @@ class GQLClient(
         return StringResponse(data, errors, httpResponse)
     }
 
+    @Suppress("unused")
     suspend fun stringSendMutation(
         url:String,
         mutation:Mutation,
