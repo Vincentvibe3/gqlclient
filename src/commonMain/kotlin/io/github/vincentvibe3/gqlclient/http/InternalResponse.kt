@@ -11,7 +11,7 @@ import kotlinx.serialization.json.JsonElement
  */
 @Serializable
 @PublishedApi
-internal class InternalResponse<T:GQLError>(
+internal class InternalResponse<T>(
     val data:JsonElement?=null,
     val errors:List<T>?=null
 )

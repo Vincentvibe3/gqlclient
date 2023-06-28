@@ -40,13 +40,13 @@ class GQLClient(
      * @see sendMutation
      * @see sendQuery
      */
-    @PublishedApi internal suspend inline fun <reified T, reified E:GQLError> send(
+    @PublishedApi internal suspend inline fun send(
        url:String,
        operation:Operation,
        variables: JsonObject?,
        operationName: String,
        headers:List<HttpHeader>
-   ): Response<T, E> {
+   ): Pair<String, HttpResponse> {
         val response = httpClient.post(url){
             headers {
                 headers.forEach {
@@ -57,9 +57,7 @@ class GQLClient(
             setBody(buildQuery(operation, operationName, variables))
         }
         val body = response.bodyAsText()
-        val responseData = Json.decodeFromString<InternalResponse<E>>(body)
-        val data = responseData.data?.let { Json.decodeFromJsonElement<T>(it) }
-        return Response(data, responseData.errors, response)
+        return body to response
     }
 
     /**
@@ -83,7 +81,10 @@ class GQLClient(
         operationName: String = "",
         headers:List<HttpHeader> = listOf()
     ): Response<T, E>{
-        return send<T, E>(url, query, variables, operationName, headers)
+        val (body, httpResponse) = send(url, query, variables, operationName, headers)
+        val responseData = Json.decodeFromString<InternalResponse<E>>(body)
+        val data = responseData.data?.let { Json.decodeFromJsonElement<T>(it) }
+        return Response(data, responseData.errors, httpResponse)
     }
 
     /**
@@ -107,7 +108,38 @@ class GQLClient(
         operationName: String = "",
         headers:List<HttpHeader> = listOf()
     ): Response<T, E>{
-        return send<T, E>(url, mutation, variables, operationName, headers)
+        val (body, httpResponse) = send(url, mutation, variables, operationName, headers)
+        val responseData = Json.decodeFromString<InternalResponse<E>>(body)
+        val data = responseData.data?.let { Json.decodeFromJsonElement<T>(it) }
+        return Response(data, responseData.errors, httpResponse)
+    }
+
+    suspend fun stringSendQuery(
+        url:String,
+        mutation:Query,
+        variables: JsonObject? = null,
+        operationName: String = "",
+        headers:List<HttpHeader> = listOf()
+    ):StringResponse{
+        val (body, httpResponse) = send(url, mutation, variables, operationName, headers)
+        val responseData = Json.decodeFromString<InternalResponse<JsonObject>>(body)
+        val data = responseData.data.toString()
+        val errors = Json.encodeToString(responseData.errors)
+        return StringResponse(data, errors, httpResponse)
+    }
+
+    suspend fun stringSendMutation(
+        url:String,
+        mutation:Mutation,
+        variables: JsonObject? = null,
+        operationName: String = "",
+        headers:List<HttpHeader> = listOf()
+    ):StringResponse{
+        val (body, httpResponse) = send(url, mutation, variables, operationName, headers)
+        val responseData = Json.decodeFromString<InternalResponse<JsonObject>>(body)
+        val data = responseData.data.toString()
+        val errors = Json.encodeToString(responseData.errors)
+        return StringResponse(data, errors, httpResponse)
     }
 
 }

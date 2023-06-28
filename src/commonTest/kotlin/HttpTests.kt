@@ -174,4 +174,38 @@ class HttpTests {
             response.data?.get("status")?.jsonPrimitive?.let { assertEquals(it.content, "OK") }
         }
     }
+
+    @Test
+    fun testErrorsStringResponse(){
+        val payload = "{\"errors\":[{\"message\":\"Cannot query field \\\"field\\\" on type \\\"Query\\\".\",\"status\":400,\"locations\":[{\"line\":16,\"column\":7}]}],\"data\":null}"
+        val expectedError="[{\"message\":\"Cannot query field \\\"field\\\" on type \\\"Query\\\".\",\"status\":400,\"locations\":[{\"line\":16,\"column\":7}]}]"
+        val mockEngine = MockEngine{ _ ->
+            respond(
+                content=payload,
+                status = HttpStatusCode.OK
+            )
+        }
+        val client = GQLClient(HttpClient(mockEngine))
+        runBlocking {
+            val response = client.stringSendQuery("", query {  })
+            response.errors?.let { assertEquals(expectedError, it) }
+        }
+    }
+
+    @Test
+    fun testStringResponse(){
+        val payload = "{\"data\":{\"hero\":{\"name\":\"R2-D2\",\"appearsIn\":[\"NEWHOPE\",\"EMPIRE\",\"JEDI\"]}}}"
+        val expectedResponse = "{\"hero\":{\"name\":\"R2-D2\",\"appearsIn\":[\"NEWHOPE\",\"EMPIRE\",\"JEDI\"]}}"
+        val mockEngine = MockEngine{ _ ->
+            respond(
+                content=payload,
+                status = HttpStatusCode.OK
+            )
+        }
+        val client = GQLClient(HttpClient(mockEngine))
+        runBlocking {
+            val response = client.stringSendQuery("", query {  })
+            response.data?.let { assertEquals(expectedResponse, it) }
+        }
+    }
 }
