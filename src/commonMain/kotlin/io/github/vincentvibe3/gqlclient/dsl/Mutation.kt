@@ -76,6 +76,7 @@ data class Mutation(val name: String): QueryElement(name, null), Operation{
      *
      * @see fragment
      */
+    @Suppress("unused")
     fun registerFragment(fragment:Fragment){
         for (variable in fragment.usedVariables){
             registerVariable(variable)
