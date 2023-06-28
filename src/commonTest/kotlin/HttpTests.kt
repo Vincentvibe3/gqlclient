@@ -1,4 +1,5 @@
 import io.github.vincentvibe3.gqlclient.dsl.Field
+import io.github.vincentvibe3.gqlclient.dsl.Variable
 import io.github.vincentvibe3.gqlclient.dsl.mutation
 import io.github.vincentvibe3.gqlclient.dsl.query
 import io.github.vincentvibe3.gqlclient.http.*
@@ -52,7 +53,7 @@ class HttpTests {
         val query = query("HeroNameAndFriends") {
             variable("varName", "varType")
             field("hero"){
-                addArg("episode", "episode", Field.ArgumentType.VARIABLE)
+                addArg("episode",  Variable("episode", "Episode"))
                 field("name")
                 field("friends"){
                     field("name")
@@ -93,7 +94,7 @@ class HttpTests {
         val query = query("HeroNameAndFriends") {
             variable("varName", "varType")
             field("hero"){
-                addArg("episode", "episode",Field.ArgumentType.VARIABLE)
+                addArg("episode", Variable("episode", "Episode"))
                 field("name")
                 field("friends"){
                     field("name")
