@@ -130,15 +130,14 @@ class DSLTests {
 
     @Test
     fun directives(){
-        val includeExpectedQuery = "query Hero(\$withFriends:Boolean!,\$episode:Episode){"+
+        val includeExpectedQuery = "query Hero(\$episode:Episode,\$withFriends:Boolean!){"+
                 "hero(episode:\$episode){name,friends@include(if:\$withFriends){name}}}"
         val includeQuery = query("Hero") {
-            variable("withFriends", "Boolean!")
             field("hero"){
                 addArg("episode", Variable("episode", "Episode"))
                 field("name")
                 field("friends"){
-                    include("withFriends")
+                    include(Variable("withFriends", "Boolean!"))
                     field("name")
                 }
             }
@@ -151,7 +150,7 @@ class DSLTests {
                 addArg("episode", Variable("episode", "Episode"))
                 field("name")
                 field("friends"){
-                    skip("withFriends")
+                    skip(Variable("withFriends", "Boolean!"))
                     field("name")
                 }
             }

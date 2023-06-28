@@ -64,6 +64,11 @@ data class Field(
      *
      */
     fun addArg(name: String, variable: Variable){
+        registerVariable(variable)
+        components.add(Argument(name, variable.name))
+    }
+
+    private fun registerVariable(variable: Variable){
         var nextParent = parent
         while (nextParent?.parent != null){
             nextParent = nextParent.parent
@@ -82,7 +87,6 @@ data class Field(
 //            is Fragment -> { nextParent.variable(typeName) }
             else -> { throw IllegalStateException("Root must be Query, Mutation or Fragment") }
         }
-        components.add(Argument(name, "$${variable.name}"))
     }
 
     /**
@@ -146,8 +150,13 @@ data class Field(
      *
      * @see Directive
      */
-    fun include(variable:String){
-        components.add(Directive(Directive.DirectiveType.INCLUDE, variable))
+    fun include(bool:Boolean){
+        components.add(Directive(Directive.DirectiveType.INCLUDE, bool.toString()))
+    }
+
+    fun include(variable: Variable){
+        registerVariable(variable)
+        components.add(Directive(Directive.DirectiveType.INCLUDE, variable.name))
     }
 
     /**
@@ -157,8 +166,13 @@ data class Field(
      *
      * @see Directive
      */
-    fun skip(variable: String){
-        components.add(Directive(Directive.DirectiveType.SKIP, variable))
+    fun skip(bool: Boolean){
+        components.add(Directive(Directive.DirectiveType.SKIP, bool.toString()))
+    }
+
+    fun skip(variable: Variable){
+        registerVariable(variable)
+        components.add(Directive(Directive.DirectiveType.SKIP, variable.name))
     }
 
     /**

@@ -27,8 +27,8 @@ data class Directive(
      */
     override fun toString(): String {
         return when (type){
-            DirectiveType.INCLUDE -> "@include(if:\$$condition)"
-            DirectiveType.SKIP -> "@skip(if:\$$condition)"
+            DirectiveType.INCLUDE -> "@include(if:$condition)"
+            DirectiveType.SKIP -> "@skip(if:$condition)"
         }
     }
 
