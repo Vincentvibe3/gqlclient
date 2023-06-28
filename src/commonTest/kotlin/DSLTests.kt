@@ -133,10 +133,9 @@ class DSLTests {
         val includeExpectedQuery = "query Hero(\$episode:Episode,\$withFriends:Boolean!){"+
                 "hero(episode:\$episode){name,friends@include(if:\$withFriends){name}}}"
         val includeQuery = query("Hero") {
-            variable("episode", "Episode")
             variable("withFriends", "Boolean!")
             field("hero"){
-                addArg("episode", "episode", Field.ArgumentType.VARIABLE)
+                addArg("episode", Variable("episode", "Episode"))
                 field("name")
                 field("friends"){
                     include("withFriends")
@@ -147,10 +146,9 @@ class DSLTests {
         val skipExpectedQuery = "query Hero(\$episode:Episode,\$withFriends:Boolean!){"+
                 "hero(episode:\$episode){name,friends@skip(if:\$withFriends){name}}}"
         val skipQuery = query("Hero") {
-            variable("episode", "Episode")
             variable("withFriends", "Boolean!")
             field("hero"){
-                addArg("episode", "episode", Field.ArgumentType.VARIABLE)
+                addArg("episode", Variable("episode", "Episode"))
                 field("name")
                 field("friends"){
                     skip("withFriends")
