@@ -38,7 +38,7 @@ data class Fragment(
     val name:String,
     private val type:String,
     val inline:Boolean
-): QueryElement("$name on $type") {
+): QueryElement("$name on $type", null) {
 
     /**
      * Generates the GraphQL string for the fragment

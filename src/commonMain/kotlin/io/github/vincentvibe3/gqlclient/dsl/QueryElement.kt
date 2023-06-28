@@ -5,9 +5,9 @@ package io.github.vincentvibe3.gqlclient.dsl
  *
  * @property queryElementName Name of the component to add
  */
-sealed class QueryElement(private val queryElementName: String): QueryComponent {
+sealed class QueryElement(private val queryElementName: String, open val parent:QueryElement?): QueryComponent {
 
-    protected val components = ArrayList<QueryComponent>()
+    internal val components = ArrayList<QueryComponent>()
 
     /**
      * Gets the name of the current type of the current [QueryElement]. Equivalent to `__typename`.
@@ -25,7 +25,7 @@ sealed class QueryElement(private val queryElementName: String): QueryComponent 
         name:String,
         init: Field.() -> Unit = {}
     ): Field {
-        val field = Field(name)
+        val field = Field(name, this)
         field.init()
         components.add(field)
         return field

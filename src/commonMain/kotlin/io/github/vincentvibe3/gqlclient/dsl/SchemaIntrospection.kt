@@ -6,4 +6,4 @@ package io.github.vincentvibe3.gqlclient.dsl
  *
  * @see Query.schema
  */
-object SchemaIntrospection : QueryElement("__schema"), Introspection
+class SchemaIntrospection(override val parent: QueryElement?) : QueryElement("__schema", parent), Introspection

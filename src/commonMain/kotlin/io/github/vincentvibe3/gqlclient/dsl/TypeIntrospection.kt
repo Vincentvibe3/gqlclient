@@ -7,7 +7,10 @@ package io.github.vincentvibe3.gqlclient.dsl
  *
  * @see Query.type
  */
-data class TypeIntrospection(val type:String): QueryElement("__type"), Introspection {
+data class TypeIntrospection(
+    val type:String,
+    override val parent: QueryElement?
+): QueryElement("__type", parent), Introspection {
 
     init {
         components.add(Argument("name", "\"$type\""))

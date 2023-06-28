@@ -1,7 +1,4 @@
-import io.github.vincentvibe3.gqlclient.dsl.Field
-import io.github.vincentvibe3.gqlclient.dsl.fragment
-import io.github.vincentvibe3.gqlclient.dsl.mutation
-import io.github.vincentvibe3.gqlclient.dsl.query
+import io.github.vincentvibe3.gqlclient.dsl.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -171,10 +168,9 @@ class DSLTests {
                 "createReview(episode:\$ep,review:\$review){stars,commentary}}"
         val mutation = mutation("CreateReviewForEpisode") {
             variable("ep", "Episode!")
-            variable("review", "ReviewInput!")
             field("createReview"){
-                addArg("episode", "ep", Field.ArgumentType.VARIABLE)
-                addArg("review", "review", Field.ArgumentType.VARIABLE)
+                addArg("episode", Variable("ep", "Episode!"))
+                addArg("review", Variable("review", "ReviewInput!"))
                 field("stars")
                 field("commentary")
             }

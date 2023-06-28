@@ -9,7 +9,8 @@ package io.github.vincentvibe3.gqlclient.dsl
  */
 data class Field(
     val name:String,
-): QueryElement(name){
+    override val parent:QueryElement?
+): QueryElement(name, parent){
 
     var alias:String? = null
 
@@ -17,7 +18,7 @@ data class Field(
      * Types that arguments can be
      */
     enum class ArgumentType{
-        STRING_LITERAL, TYPE, NUMBER, VARIABLE
+        STRING_LITERAL, TYPE, NUMBER
     }
 
     /**
@@ -50,9 +51,38 @@ data class Field(
             ArgumentType.NUMBER -> typeName
             ArgumentType.STRING_LITERAL -> "\"$typeName\""
             ArgumentType.TYPE -> typeName
-            ArgumentType.VARIABLE -> "$$typeName"
         }
         components.add(Argument(name, formattedTypeName))
+    }
+
+    /**
+     * Adds a variable as an argument to the field.
+     * This will automatically register the variable for use in the query or mutation.
+     *
+     * @param name Name of the Argument
+     * @param variable Variable to use.
+     *
+     */
+    fun addArg(name: String, variable: Variable){
+        var nextParent = parent
+        while (nextParent?.parent != null){
+            nextParent = nextParent.parent
+        }
+        when (nextParent){
+            is Query -> {
+                if (!nextParent.components.contains(variable)) {
+                    nextParent.variable(variable)
+                }
+            }
+            is Mutation -> {
+                if (!nextParent.components.contains(variable)) {
+                    nextParent.variable(variable)
+                }
+            }
+//            is Fragment -> { nextParent.variable(typeName) }
+            else -> { throw IllegalStateException("Root must be Query, Mutation or Fragment") }
+        }
+        components.add(Argument(name, "$${variable.name}"))
     }
 
     /**
@@ -72,7 +102,6 @@ data class Field(
             ArgumentType.NUMBER -> "$typeName"
             ArgumentType.STRING_LITERAL -> "\"$typeName\""
             ArgumentType.TYPE -> "$typeName"
-            ArgumentType.VARIABLE -> "$$typeName"
         }
         components.add(Argument(name, formattedTypeName))
     }
@@ -141,7 +170,7 @@ data class Field(
      * @see Fragment
      */
     fun useFragment(fragment:Fragment){
-        components.add(FragmentUse(fragment))
+        components.add(FragmentUse(fragment, this))
     }
 
     override fun equals(other: Any?): Boolean {

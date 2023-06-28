@@ -10,14 +10,14 @@ package io.github.vincentvibe3.gqlclient.dsl
  * @see Mutation.variable
  */
 data class Variable(
-    private val name:String,
-    private val type:String
+    val name:String,
+    val type:String
 ): QueryComponent {
 
     /**
      * Generate the GraphQl string for the variable declaration
      */
     override fun toString(): String {
-        return "$name:$type"
+        return "$$name:$type"
     }
 }

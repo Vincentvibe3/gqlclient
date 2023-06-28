@@ -27,7 +27,7 @@ fun query(
  *
  * @see query
  */
-data class Query(val name:String): QueryElement(name), Operation{
+data class Query(val name:String): QueryElement(name, null), Operation{
 
     /**
      * Puts type information into the query. Equivalent to adding a `__type`.
@@ -43,7 +43,7 @@ data class Query(val name:String): QueryElement(name), Operation{
         type:String,
         init: TypeIntrospection.() -> Unit
     ): TypeIntrospection {
-        val typeIntrospection = TypeIntrospection(type)
+        val typeIntrospection = TypeIntrospection(type, this)
         components.add(typeIntrospection)
         typeIntrospection.init()
         return typeIntrospection
@@ -57,7 +57,11 @@ data class Query(val name:String): QueryElement(name), Operation{
      *
      */
     fun variable(name: String, type: String){
-        components.add(Variable("$$name", type))
+        components.add(Variable(name, type))
+    }
+
+    fun variable(variable: Variable){
+        components.add(variable)
     }
 
     /**
@@ -93,7 +97,7 @@ data class Query(val name:String): QueryElement(name), Operation{
     fun schema(
         init: SchemaIntrospection.() -> Unit = {}
     ): SchemaIntrospection {
-        val schema = SchemaIntrospection
+        val schema = SchemaIntrospection(this)
         schema.init()
         components.add(schema)
         return schema

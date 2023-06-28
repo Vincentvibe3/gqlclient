@@ -27,7 +27,7 @@ fun mutation(
  *
  * @see mutation
  */
-data class Mutation(val name: String): QueryElement(name), Operation{
+data class Mutation(val name: String): QueryElement(name, null), Operation{
 
     /**
      * Create a variable for use in the GraphQL query
@@ -37,7 +37,11 @@ data class Mutation(val name: String): QueryElement(name), Operation{
      *
      */
     fun variable(name: String, type: String){
-        components.add(Variable("$$name", type))
+        components.add(Variable(name, type))
+    }
+
+    fun variable(variable: Variable){
+        components.add(variable)
     }
 
     /**
