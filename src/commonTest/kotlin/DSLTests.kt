@@ -129,6 +129,83 @@ class DSLTests {
     }
 
     @Test
+    fun variableInFragment(){
+        val query = query {
+            val fragment = fragment("comparisonFields", "Character") {
+                field("name")
+                field("appearsIn")
+                field("friends"){
+                    field("name")
+                    addArg("name", Variable("charName", "STRING"))
+                }
+            }
+            field("hero"){
+                addArg("episode", "EMPIRE", Field.ArgumentType.TYPE)
+                alias = "leftComparison"
+                useFragment(fragment)
+            }
+            field("hero"){
+                addArg("episode", "JEDI", Field.ArgumentType.TYPE)
+                alias = "rightComparison"
+                useFragment(fragment)
+            }
+        }
+        val expectedQuery = "query (\$charName:STRING){leftComparison:hero(episode:EMPIRE){...comparisonFields},"+
+                "rightComparison:hero(episode:JEDI){...comparisonFields}},"+
+                "fragment comparisonFields on Character{name,appearsIn,friends(name:\$charName){name}}"
+        assertEquals(expectedQuery, query.toString())
+    }
+
+    @Test
+    fun variablesInInlineFragments(){
+        val expectedQuery = "query (\$droidName:STRING){hero(episode:JEDI){name,... on Droid{primaryFunction(name:\$droidName)},... on Human{height}}}"
+        val query = query {
+            field("hero"){
+                addArg("episode", "JEDI", Field.ArgumentType.TYPE)
+                field("name")
+                fragment("Droid"){
+                    field("primaryFunction"){
+                        addArg("name", Variable("droidName", "STRING"))
+                    }
+                }
+                fragment("Human"){
+                    field("height")
+                }
+            }
+        }
+        assertEquals(expectedQuery, query.toString())
+    }
+
+    @Test
+    fun variableInExternalFragment(){
+        val fragment = fragment("comparisonFields", "Character") {
+            field("name")
+            field("appearsIn")
+            field("friends"){
+                field("name")
+                addArg("name", Variable("charName", "STRING"))
+            }
+        }
+        val query = query {
+            registerFragment(fragment)
+            field("hero"){
+                addArg("episode", "EMPIRE", Field.ArgumentType.TYPE)
+                alias = "leftComparison"
+                useFragment(fragment)
+            }
+            field("hero"){
+                addArg("episode", "JEDI", Field.ArgumentType.TYPE)
+                alias = "rightComparison"
+                useFragment(fragment)
+            }
+        }
+        val expectedQuery = "query (\$charName:STRING){leftComparison:hero(episode:EMPIRE){...comparisonFields},"+
+                "rightComparison:hero(episode:JEDI){...comparisonFields}},"+
+                "fragment comparisonFields on Character{name,appearsIn,friends(name:\$charName){name}}"
+        assertEquals(expectedQuery, query.toString())
+    }
+
+    @Test
     fun directives(){
         val includeExpectedQuery = "query Hero(\$episode:Episode,\$withFriends:Boolean!){"+
                 "hero(episode:\$episode){name,friends@include(if:\$withFriends){name}}}"

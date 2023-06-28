@@ -9,6 +9,42 @@ sealed class QueryElement(private val queryElementName: String, open val parent:
 
     internal val components = ArrayList<QueryComponent>()
 
+    internal fun registerVariable(variable: Variable){
+        if (this is Query){
+            if(!this.components.contains(variable)){
+                this.variable(variable)
+            }
+        } else if (this is Mutation) {
+            if(!this.components.contains(variable)){
+                this.variable(variable)
+            }
+        } else {
+            var nextParent = parent
+            while (nextParent?.parent != null){
+                nextParent = nextParent.parent
+            }
+            when (nextParent){
+                is Query -> {
+                    if (!nextParent.components.contains(variable)) {
+                        nextParent.variable(variable)
+                    }
+                }
+                is Mutation -> {
+                    if (!nextParent.components.contains(variable)) {
+                        nextParent.variable(variable)
+                    }
+                }
+                is Fragment -> {
+                    if (!nextParent.components.contains(variable)) {
+                        nextParent.variable(variable)
+                    }
+                }
+                else -> { throw IllegalStateException("Root must be Query, Mutation or Fragment") }
+            }
+        }
+
+    }
+
     /**
      * Gets the name of the current type of the current [QueryElement]. Equivalent to `__typename`.
      */

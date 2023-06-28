@@ -40,6 +40,12 @@ data class Fragment(
     val inline:Boolean
 ): QueryElement("$name on $type", null) {
 
+    internal val usedVariables = arrayListOf<Variable>()
+
+    internal fun variable(variable: Variable){
+        usedVariables.add(variable)
+    }
+
     /**
      * Generates the GraphQL string for the fragment
      */

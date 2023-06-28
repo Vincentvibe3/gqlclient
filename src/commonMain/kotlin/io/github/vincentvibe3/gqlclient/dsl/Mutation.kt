@@ -63,7 +63,24 @@ data class Mutation(val name: String): QueryElement(name, null), Operation{
     ): Fragment {
         val fragment = io.github.vincentvibe3.gqlclient.dsl.fragment(name, type, init)
         components.add(fragment)
+        for (variable in fragment.usedVariables){
+            registerVariable(variable)
+        }
         return fragment
+    }
+
+    /**
+     * Register an existing [Fragment] into the mutation
+     *
+     * @param fragment The [Fragment] to add
+     *
+     * @see fragment
+     */
+    fun registerFragment(fragment:Fragment){
+        for (variable in fragment.usedVariables){
+            registerVariable(variable)
+        }
+        components.add(fragment)
     }
 
     /**

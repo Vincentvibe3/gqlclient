@@ -68,27 +68,6 @@ data class Field(
         components.add(Argument(name, variable.name))
     }
 
-    private fun registerVariable(variable: Variable){
-        var nextParent = parent
-        while (nextParent?.parent != null){
-            nextParent = nextParent.parent
-        }
-        when (nextParent){
-            is Query -> {
-                if (!nextParent.components.contains(variable)) {
-                    nextParent.variable(variable)
-                }
-            }
-            is Mutation -> {
-                if (!nextParent.components.contains(variable)) {
-                    nextParent.variable(variable)
-                }
-            }
-//            is Fragment -> { nextParent.variable(typeName) }
-            else -> { throw IllegalStateException("Root must be Query, Mutation or Fragment") }
-        }
-    }
-
     /**
      * Adds an argument to the field
      *
@@ -140,6 +119,9 @@ data class Field(
         val fragment = Fragment("...", type, true)
         components.add(fragment)
         fragment.init()
+        for (variable in fragment.usedVariables){
+            registerVariable(variable)
+        }
         return fragment
     }
 
@@ -184,6 +166,9 @@ data class Field(
      * @see Fragment
      */
     fun useFragment(fragment:Fragment){
+        for (variable in fragment.usedVariables){
+            registerVariable(variable)
+        }
         components.add(FragmentUse(fragment, this))
     }
 
