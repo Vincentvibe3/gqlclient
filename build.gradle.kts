@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "io.github.vincentvibe3"
-version = "1.0.3"
+version = "1.0.4"
 
 repositories {
     mavenCentral()
@@ -66,16 +66,32 @@ kotlin {
     val isMingwX64 = hostOs.startsWith("Windows")
     when {
         hostOs == "Mac OS X" -> {
-            macosX64()
-            macosArm64()
+            macosX64{
+                binaries {
+                    sharedLib()
+                }
+            }
+            macosArm64{
+                binaries {
+                    sharedLib()
+                }
+            }
         }
 
         hostOs == "Linux" -> {
-            linuxX64()
+            linuxX64{
+                binaries {
+                    sharedLib()
+                }
+            }
         }
 
         isMingwX64 -> {
-            mingwX64()
+            mingwX64{
+                binaries {
+                    sharedLib()
+                }
+            }
         }
         else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
     }
