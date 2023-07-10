@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "io.github.vincentvibe3"
-version = "1.0.2"
+version = "1.0.3"
 
 repositories {
     mavenCentral()
@@ -100,12 +100,12 @@ kotlin {
         when {
             hostOs == "Mac OS X" -> {
                 val macosX64Test by getting {
-                    dependencies{
+                    dependencies {
                         implementation("io.ktor:ktor-client-darwin:$ktorVersion")
                     }
                 }
                 val macosArm64Test by getting {
-                    dependencies{
+                    dependencies {
                         implementation("io.ktor:ktor-client-darwin:$ktorVersion")
                     }
                 }
@@ -113,7 +113,7 @@ kotlin {
 
             hostOs == "Linux" -> {
                 val linuxX64Test by getting {
-                    dependencies{
+                    dependencies {
                         implementation("io.ktor:ktor-client-cio:$ktorVersion")
                     }
                 }
@@ -121,12 +121,13 @@ kotlin {
 
             isMingwX64 -> {
                 val mingwX64Test by getting {
-                    dependencies{
+                    dependencies {
                         implementation("io.ktor:ktor-client-winhttp:$ktorVersion")
                     }
                 }
 
             }
+
             else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
         }
 
@@ -153,23 +154,10 @@ kotlin {
             iosX64Test.dependsOn(this)
             iosArm64Test.dependsOn(this)
             iosSimulatorArm64Test.dependsOn(this)
-            dependencies{
+            dependencies {
                 implementation("io.ktor:ktor-client-darwin:$ktorVersion")
             }
         }
     }
-
-//    val nativeTarget = when {
-//        hostOs == "Mac OS X" -> {
-//            macosX64("macosX64")
-//            macosArm64("macosArm64")
-//        }
-//        hostOs == "Linux" -> {
-//            linuxX64("linuxX64")
-//            linuxArm64("linuxArm64")
-//        }
-//        isMingwX64 -> mingwX64("mingwX64")
-//        else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
-//    }
 
 }
