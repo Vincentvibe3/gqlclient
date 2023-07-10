@@ -60,7 +60,7 @@ jobs:
   drop-or-release:
    needs: [create-staging-repository, build-publish]
    runs-on: ubuntu-latest
-   if: ${{ always() && needs.create_staging_repository.result == 'success' }}
+   if: ${{ always() && needs.create-staging-repository.result == 'success' }}
    steps:
     - uses: actions/checkout@v3
     - name: Discard
@@ -69,7 +69,7 @@ jobs:
       with:
        username: ${{ secrets.OSSRH_USERNAME }}
        password: ${{ secrets.OSSRH_PASSWORD }}
-       staging_repository_id: ${{ needs.create_staging_repository.outputs.repository_id }}
+       staging_repository_id: ${{ needs.create-staging-repository.outputs.repository_id }}
        base_url: https://s01.oss.sonatype.org/service/local/
          
     - name: Release
@@ -78,7 +78,7 @@ jobs:
       with:
          username: ${{ secrets.OSSRH_USERNAME }}
          password: ${{ secrets.OSSRH_PASSWORD }}
-         staging_repository_id: ${{ needs.create_staging_repository.outputs.repository_id }}
+         staging_repository_id: ${{ needs.create-staging-repository.outputs.repository_id }}
          base_url: https://s01.oss.sonatype.org/service/local/
     
     - name: Set env
