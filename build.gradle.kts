@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
+
 plugins {
     kotlin("multiplatform") version "1.8.21"
     kotlin("plugin.serialization") version "1.8.21"
@@ -17,7 +19,7 @@ val isCI: Boolean = System.getenv("CI").toBoolean()
 
 kotlin {
     val publicationsFromMainHost =
-        listOf(jvm()).map { it.name } + "kotlinMultiplatform"
+        listOf(jvm(), linuxX64()).map { target: KotlinTarget ->  target.name } + "kotlinMultiplatform"
     publishing{
         publications{
             if (isCI){
