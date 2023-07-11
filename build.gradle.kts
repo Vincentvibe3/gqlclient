@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "io.github.vincentvibe3"
-version = "1.0.4"
+version = "1.0.5"
 
 repositories {
     mavenCentral()
@@ -64,37 +64,10 @@ kotlin {
     }
     val hostOs = System.getProperty("os.name")
     val isMingwX64 = hostOs.startsWith("Windows")
-    when {
-        hostOs == "Mac OS X" -> {
-            macosX64{
-                binaries {
-                    sharedLib()
-                }
-            }
-            macosArm64{
-                binaries {
-                    sharedLib()
-                }
-            }
-        }
-
-        hostOs == "Linux" -> {
-            linuxX64{
-                binaries {
-                    sharedLib()
-                }
-            }
-        }
-
-        isMingwX64 -> {
-            mingwX64{
-                binaries {
-                    sharedLib()
-                }
-            }
-        }
-        else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
-    }
+    macosX64()
+    macosArm64()
+    linuxX64()
+    mingwX64()
 
     sourceSets {
         val ktorVersion = "2.2.4"
@@ -113,39 +86,31 @@ kotlin {
             }
         }
 
-        when {
-            hostOs == "Mac OS X" -> {
-                val macosX64Test by getting {
-                    dependencies {
-                        implementation("io.ktor:ktor-client-darwin:$ktorVersion")
-                    }
-                }
-                val macosArm64Test by getting {
-                    dependencies {
-                        implementation("io.ktor:ktor-client-darwin:$ktorVersion")
-                    }
-                }
+
+        val macosX64Test by getting {
+            dependencies {
+                implementation("io.ktor:ktor-client-darwin:$ktorVersion")
             }
-
-            hostOs == "Linux" -> {
-                val linuxX64Test by getting {
-                    dependencies {
-                        implementation("io.ktor:ktor-client-cio:$ktorVersion")
-                    }
-                }
-            }
-
-            isMingwX64 -> {
-                val mingwX64Test by getting {
-                    dependencies {
-                        implementation("io.ktor:ktor-client-winhttp:$ktorVersion")
-                    }
-                }
-
-            }
-
-            else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
         }
+        val macosArm64Test by getting {
+            dependencies {
+                implementation("io.ktor:ktor-client-darwin:$ktorVersion")
+            }
+        }
+
+        val linuxX64Test by getting {
+            dependencies {
+                implementation("io.ktor:ktor-client-cio:$ktorVersion")
+            }
+        }
+
+        val mingwX64Test by getting {
+            dependencies {
+                implementation("io.ktor:ktor-client-winhttp:$ktorVersion")
+            }
+        }
+
+
 
         val jvmMain by getting
         val jvmTest by getting {
