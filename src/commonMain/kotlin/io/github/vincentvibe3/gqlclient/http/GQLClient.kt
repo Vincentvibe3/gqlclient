@@ -16,10 +16,14 @@ import kotlinx.serialization.json.*
  * @param httpClient The [HttpClient]
  * used to send requests. Uses an automatically configured [HttpClient] by default.
  *
+ * @param json
+ * The instance of [Json] to use to serialize variables and serialize responses.
+ *
  * @see HttpClient
  */
 class GQLClient(
-    val httpClient: HttpClient = HttpClient()
+    val httpClient: HttpClient = HttpClient(),
+    val json: Json = Json
 ) {
 
     /**
@@ -31,7 +35,7 @@ class GQLClient(
         val name = operationName.ifBlank {
             null
         }
-        return Json.encodeToString(QueryRequest(operation.toString(),name,variables))
+        return json.encodeToString(QueryRequest(operation.toString(),name,variables))
     }
 
     /**
@@ -82,8 +86,8 @@ class GQLClient(
         headers:List<HttpHeader> = listOf()
     ): Response<T, E>{
         val (body, httpResponse) = send(url, query, variables, operationName, headers)
-        val responseData = Json.decodeFromString<InternalResponse<E>>(body)
-        val data = responseData.data?.let { Json.decodeFromJsonElement<T>(it) }
+        val responseData = json.decodeFromString<InternalResponse<E>>(body)
+        val data = responseData.data?.let { json.decodeFromJsonElement<T>(it) }
         return Response(data, responseData.errors, httpResponse)
     }
 
@@ -109,8 +113,8 @@ class GQLClient(
         headers:List<HttpHeader> = listOf()
     ): Response<T, E>{
         val (body, httpResponse) = send(url, mutation, variables, operationName, headers)
-        val responseData = Json.decodeFromString<InternalResponse<E>>(body)
-        val data = responseData.data?.let { Json.decodeFromJsonElement<T>(it) }
+        val responseData = json.decodeFromString<InternalResponse<E>>(body)
+        val data = responseData.data?.let { json.decodeFromJsonElement<T>(it) }
         return Response(data, responseData.errors, httpResponse)
     }
 
@@ -122,9 +126,9 @@ class GQLClient(
         headers:List<HttpHeader> = listOf()
     ):StringResponse{
         val (body, httpResponse) = send(url, mutation, variables, operationName, headers)
-        val responseData = Json.decodeFromString<InternalResponse<JsonObject>>(body)
+        val responseData = json.decodeFromString<InternalResponse<JsonObject>>(body)
         val data = responseData.data.toString()
-        val errors = Json.encodeToString(responseData.errors)
+        val errors = json.encodeToString(responseData.errors)
         return StringResponse(data, errors, httpResponse)
     }
 
@@ -137,9 +141,9 @@ class GQLClient(
         headers:List<HttpHeader> = listOf()
     ):StringResponse{
         val (body, httpResponse) = send(url, mutation, variables, operationName, headers)
-        val responseData = Json.decodeFromString<InternalResponse<JsonObject>>(body)
+        val responseData = json.decodeFromString<InternalResponse<JsonObject>>(body)
         val data = responseData.data.toString()
-        val errors = Json.encodeToString(responseData.errors)
+        val errors = json.encodeToString(responseData.errors)
         return StringResponse(data, errors, httpResponse)
     }
 
