@@ -15,7 +15,11 @@ sealed class QueryElement(private val queryElementName: String, open val parent:
                 this.variable(variable)
             }
         } else if (this is Mutation) {
-            if(!this.components.contains(variable)){
+            if (!this.components.contains(variable)) {
+                this.variable(variable)
+            }
+        }else if (this is Fragment){
+            if (!this.components.contains(variable)){
                 this.variable(variable)
             }
         } else {
@@ -37,6 +41,49 @@ sealed class QueryElement(private val queryElementName: String, open val parent:
                 is Fragment -> {
                     if (!nextParent.components.contains(variable)) {
                         nextParent.variable(variable)
+                    }
+                }
+                else -> { throw IllegalStateException("Root must be Query, Mutation or Fragment") }
+            }
+        }
+
+    }
+
+    internal fun registerFragmentToParent(fragment: Fragment){
+        fragment.components.filterIsInstance<Fragment>().forEach {
+            registerFragmentToParent(it)
+        }
+        if (this is Query){
+            if(!this.components.contains(fragment)){
+                this.registerFragment(fragment)
+            }
+        } else if (this is Mutation) {
+            if(!this.components.contains(fragment)){
+                this.registerFragment(fragment)
+            }
+        } else if (this is Fragment){
+            if (!this.components.contains(fragment)){
+                this.registerFragment(fragment)
+            }
+        } else {
+            var nextParent = parent
+            while (nextParent?.parent != null){
+                nextParent = nextParent.parent
+            }
+            when (nextParent){
+                is Query -> {
+                    if (!nextParent.components.contains(fragment)) {
+                        nextParent.registerFragment(fragment)
+                    }
+                }
+                is Mutation -> {
+                    if (!nextParent.components.contains(fragment)) {
+                        nextParent.registerFragment(fragment)
+                    }
+                }
+                is Fragment -> {
+                    if (!nextParent.components.contains(fragment)){
+                        nextParent.registerFragment(fragment)
                     }
                 }
                 else -> { throw IllegalStateException("Root must be Query, Mutation or Fragment") }
@@ -100,11 +147,13 @@ sealed class QueryElement(private val queryElementName: String, open val parent:
                 queryString+="}"
             }
         }
-        val fragmentDeclarations = components.filterIsInstance<Fragment>().filter {
-            !it.inline
-        }.joinToString(",")
-        if (fragmentDeclarations.isNotBlank()){
-            queryString+=",$fragmentDeclarations"
+        if (this is Query || this is Mutation){
+            val fragmentDeclarations = components.filterIsInstance<Fragment>().filter {
+                !it.inline
+            }.joinToString(",")
+            if (fragmentDeclarations.isNotBlank()){
+                queryString+=",$fragmentDeclarations"
+            }
         }
         return queryString
     }

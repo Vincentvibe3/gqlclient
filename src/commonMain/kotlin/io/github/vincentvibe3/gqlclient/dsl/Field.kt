@@ -166,6 +166,7 @@ data class Field(
      * @see Fragment
      */
     fun useFragment(fragment:Fragment){
+        registerFragmentToParent(fragment)
         for (variable in fragment.usedVariables){
             registerVariable(variable)
         }

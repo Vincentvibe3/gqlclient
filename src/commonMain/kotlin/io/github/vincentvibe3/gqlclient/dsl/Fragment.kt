@@ -47,6 +47,36 @@ data class Fragment(
     }
 
     /**
+     * Register a nested [Fragment] into the fragment
+     *
+     * @param fragment The [Fragment] to add
+     *
+     * @see fragment
+     */
+    fun registerFragment(fragment:Fragment) {
+        for (variable in fragment.usedVariables) {
+            registerVariable(variable)
+        }
+        if (!components.contains(fragment)) {
+            components.add(fragment)
+        }
+    }
+
+    /**
+     * Inserts a nested fragment into the fragment
+     *
+     * @param fragment [Fragment] to be added
+     *
+     */
+    fun useFragment(fragment:Fragment){
+        registerFragmentToParent(fragment)
+        for (variable in fragment.usedVariables){
+            registerVariable(variable)
+        }
+        components.add(FragmentUse(fragment, this))
+    }
+
+    /**
      * Generates the GraphQL string for the fragment
      */
     override fun toString(): String {

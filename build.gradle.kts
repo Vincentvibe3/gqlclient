@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "io.github.vincentvibe3"
-version = "1.0.6"
+version = "1.0.7"
 
 repositories {
     mavenCentral()

@@ -3,14 +3,14 @@ package io.github.vincentvibe3.gqlclient.dsl
 /**
  * Represents a reference to a fragment in a field
  *
- * @property name Name of the fragment to use
+ * @property attachedFragment Name of the fragment to use
  *
  * @see Field.useFragment
  */
 data class FragmentUse(
-    val name:Fragment,
+    val attachedFragment:Fragment,
     override val parent: QueryElement?
-): QueryElement("...${name.name}", parent){
+): QueryElement("...${attachedFragment.name}", parent){
 
     /**
      * Generates the GraphQL string for the fragment usage

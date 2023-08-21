@@ -118,7 +118,9 @@ data class Query(val name:String): QueryElement(name, null), Operation{
         for (variable in fragment.usedVariables){
             registerVariable(variable)
         }
-        components.add(fragment)
+        if (!components.contains(fragment)) {
+            components.add(fragment)
+        }
     }
 
     /**

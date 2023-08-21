@@ -293,4 +293,62 @@ class DSLTests {
         }
         assertEquals(expectedQuery, query.toString())
     }
+
+    @Test
+    fun nestedFragments(){
+        val expectedQuery = "query {type2{...f2}},fragment f1 on type{id},fragment f2 on type2{...f1}"
+        val fragment1 = fragment("f1", "type"){
+            field("id")
+        }
+        val fragment2 = fragment("f2", "type2"){
+            useFragment(fragment1)
+        }
+        val query = query {
+            field("type2"){
+                useFragment(fragment2)
+            }
+        }
+        assertEquals(expectedQuery, query.toString())
+    }
+
+    @Test
+    fun deepNestedFragments(){
+        val expectedQuery = "query {type2{...f2}},fragment f1 on type{id},fragment f2 on type2{type{...f1}}"
+        val fragment1 = fragment("f1", "type"){
+            field("id")
+        }
+        val fragment2 = fragment("f2", "type2"){
+            field("type"){
+                useFragment(fragment1)
+            }
+        }
+        val query = query {
+            field("type2"){
+                useFragment(fragment2)
+            }
+        }
+        assertEquals(expectedQuery, query.toString())
+    }
+
+    @Test
+    fun deepNestedFragmentsVariables(){
+        val expectedQuery = "query (\$var1:type3){type2{...f2}},fragment f1 on type{id(arg:\$var1)},fragment f2 on type2{type{...f1}}"
+        val fragment1 = fragment("f1", "type"){
+            field("id"){
+                addArg("arg", Variable("var1", "type3"))
+            }
+        }
+        val fragment2 = fragment("f2", "type2"){
+            field("type"){
+                useFragment(fragment1)
+            }
+        }
+        val query = query {
+            registerFragment(fragment1)
+            field("type2"){
+                useFragment(fragment2)
+            }
+        }
+        assertEquals(expectedQuery, query.toString())
+    }
 }
