@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
 plugins {
     kotlin("multiplatform") version "1.8.21"
     kotlin("plugin.serialization") version "1.8.21"
-    id("org.jetbrains.dokka") version "1.8.10"
+    id("org.jetbrains.dokka") version "1.9.20"
     id("publication-plugin")
     `maven-publish`
 }
@@ -143,4 +143,22 @@ kotlin {
         }
     }
 
+}
+
+tasks.dokkaHtml.configure {
+    outputDirectory.set(project.projectDir.resolve("docs"))
+    dokkaSourceSets {
+        configureEach {
+            jdkVersion.set(17)
+        }
+    }
+}
+
+tasks.dokkaJavadoc.configure {
+    outputDirectory.set(buildDir.resolve("dokka/javadoc"))
+    dokkaSourceSets {
+        configureEach {
+            jdkVersion.set(17)
+        }
+    }
 }

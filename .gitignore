@@ -29,3 +29,6 @@ build/
 
 #Secrets
 local.properties
+
+# Docs
+docs/
